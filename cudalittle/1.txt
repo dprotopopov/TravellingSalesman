@@ -1,0 +1,595 @@
+Title :	Little's algorithm
+File name :	1.csv
+Matrix rank :	6
+2147483647	2	3	2147483647	1000	2147483647
+2	2147483647	4	2147483647	2147483647	999
+3	4	2147483647	2147483647	3000	2147483647
+2147483647	2147483647	1000	2147483647	5000	999
+111	2147483647	2147483647	2000	2147483647	888
+666	2147483647	1111	2147483647	999	2147483647
+Running on GPU 0 (GeForce GTX 650)
+ Check Graph by rows 
+ Check Graph by columns 
+Graph is ok
+Matrix rank :	6
+2147483647	2	3	2147483647	1000	2147483647
+2	2147483647	4	2147483647	2147483647	999
+3	4	2147483647	2147483647	3000	2147483647
+2147483647	2147483647	1000	2147483647	5000	999
+111	2147483647	2147483647	2000	2147483647	888
+666	2147483647	1111	2147483647	999	2147483647
+ global_add_forbidden 
+2147483647	2	3	2147483647	1000	2147483647
+2	2147483647	4	2147483647	2147483647	999
+3	4	2147483647	2147483647	3000	2147483647
+2147483647	2147483647	1000	2147483647	5000	999
+111	2147483647	2147483647	2000	2147483647	888
+666	2147483647	1111	2147483647	999	2147483647
+ global_min_by_row 
+ global_sub_by_row 
+2147483647	0	1	2147483647	998	2147483647
+0	2147483647	2	2147483647	2147483647	997
+0	1	2147483647	2147483647	2997	2147483647
+2147483647	2147483647	1	2147483647	4001	0
+0	2147483647	2147483647	1889	2147483647	777
+0	2147483647	445	2147483647	333	2147483647
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+2147483647	0	0	2147483647	665	2147483647
+0	2147483647	1	2147483647	2147483647	997
+0	1	2147483647	2147483647	2664	2147483647
+2147483647	2147483647	0	2147483647	3668	0
+0	2147483647	2147483647	0	2147483647	777
+0	2147483647	444	2147483647	0	2147483647
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+4006
+ global_queue_oneway 
+ global_calc_gamma 
+-2147483648	1	0	-2147483648	-2147483648	-2147483648
+1	-2147483648	-2147483648	-2147483648	-2147483648	-2147483648
+1	-2147483648	-2147483648	-2147483648	-2147483648	-2147483648
+-2147483648	-2147483648	0	-2147483648	-2147483648	777
+0	-2147483648	-2147483648	0	-2147483648	-2147483648
+0	-2147483648	-2147483648	-2147483648	665	-2147483648
+ global_queue_indexes_of_max 
+23
+ global_matrix_trunc 
+Matrix rank :	5
+2147483647	0	0	2147483647	665
+0	2147483647	1	2147483647	2147483647
+0	1	2147483647	2147483647	2664
+0	2147483647	2147483647	0	2147483647
+0	2147483647	444	2147483647	0
+ global_add_forbidden 
+2147483647	0	0	2147483647	665
+0	2147483647	1	2147483647	2147483647
+0	1	2147483647	2147483647	2664
+0	2147483647	2147483647	0	2147483647
+0	2147483647	444	2147483647	0
+ global_min_by_row 
+ global_sub_by_row 
+2147483647	0	0	2147483647	665
+0	2147483647	1	2147483647	2147483647
+0	1	2147483647	2147483647	2664
+0	2147483647	2147483647	0	2147483647
+0	2147483647	444	2147483647	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+2147483647	0	0	2147483647	665
+0	2147483647	1	2147483647	2147483647
+0	1	2147483647	2147483647	2664
+0	2147483647	2147483647	0	2147483647
+0	2147483647	444	2147483647	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+0
+ global_queue_oneway 
+ global_calc_gamma 
+-2147483648	1	1	-2147483648	-2147483648
+1	-2147483648	-2147483648	-2147483648	-2147483648
+1	-2147483648	-2147483648	-2147483648	-2147483648
+0	-2147483648	-2147483648	0	-2147483648
+0	-2147483648	-2147483648	-2147483648	665
+ global_queue_indexes_of_max 
+24
+ global_matrix_trunc 
+Matrix rank :	4
+2147483647	0	0	2147483647
+0	2147483647	1	2147483647
+0	1	2147483647	2147483647
+0	2147483647	2147483647	0
+ global_add_forbidden 
+2147483647	0	0	2147483647
+0	2147483647	1	2147483647
+0	1	2147483647	2147483647
+0	2147483647	2147483647	0
+ global_min_by_row 
+ global_sub_by_row 
+2147483647	0	0	2147483647
+0	2147483647	1	2147483647
+0	1	2147483647	2147483647
+0	2147483647	2147483647	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+2147483647	0	0	2147483647
+0	2147483647	1	2147483647
+0	1	2147483647	2147483647
+0	2147483647	2147483647	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+0
+ global_queue_oneway 
+ global_calc_gamma 
+-2147483648	1	1	-2147483648
+1	-2147483648	-2147483648	-2147483648
+1	-2147483648	-2147483648	-2147483648
+0	-2147483648	-2147483648	0
+ global_queue_indexes_of_max 
+8	4	2	1
+ global_matrix_trunc 
+Matrix rank :	3
+0	0	2147483647
+2147483647	1	2147483647
+2147483647	2147483647	0
+ global_add_forbidden 
+0	2147483647	2147483647
+2147483647	1	2147483647
+2147483647	2147483647	0
+ global_min_by_row 
+ global_sub_by_row 
+0	2147483647	2147483647
+2147483647	0	2147483647
+2147483647	2147483647	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+0	2147483647	2147483647
+2147483647	0	2147483647
+2147483647	2147483647	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+1
+ global_queue_oneway 
+ global_calc_gamma 
+2147483647	-2147483648	-2147483648
+-2147483648	2147483647	-2147483648
+-2147483648	-2147483648	2147483647
+ global_queue_indexes_of_max 
+8	4	0
+ global_matrix_trunc 
+Matrix rank :	2
+0	2147483647
+2147483647	0
+ global_add_forbidden 
+0	2147483647
+2147483647	0
+ global_min_by_row 
+ global_sub_by_row 
+0	2147483647
+2147483647	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+0	2147483647
+2147483647	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+0
+ global_queue_oneway 
+ global_calc_gamma 
+2147483647	-2147483648
+-2147483648	2147483647
+ global_queue_indexes_of_max 
+3	0
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ Return from Recursion 
+ global_matrix_trunc 
+Matrix rank :	2
+0	2147483647
+2147483647	0
+ global_add_forbidden 
+0	2147483647
+2147483647	0
+ global_min_by_row 
+ global_sub_by_row 
+0	2147483647
+2147483647	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+0	2147483647
+2147483647	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+0
+ global_queue_oneway 
+ global_calc_gamma 
+2147483647	-2147483648
+-2147483648	2147483647
+ global_queue_indexes_of_max 
+3	0
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ Return from Recursion 
+ global_matrix_trunc 
+Matrix rank :	2
+0	2147483647
+2147483647	0
+ global_add_forbidden 
+0	2147483647
+2147483647	0
+ global_min_by_row 
+ global_sub_by_row 
+0	2147483647
+2147483647	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+0	2147483647
+2147483647	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+0
+ global_queue_oneway 
+ global_calc_gamma 
+2147483647	-2147483648
+-2147483648	2147483647
+ global_queue_indexes_of_max 
+3	0
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ Return from Recursion 
+ Return from Recursion 
+ global_matrix_trunc 
+Matrix rank :	3
+0	0	2147483647
+1	2147483647	2147483647
+2147483647	2147483647	0
+ global_add_forbidden 
+2147483647	0	2147483647
+1	2147483647	2147483647
+2147483647	2147483647	0
+ global_min_by_row 
+ global_sub_by_row 
+2147483647	0	2147483647
+0	2147483647	2147483647
+2147483647	2147483647	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+2147483647	0	2147483647
+0	2147483647	2147483647
+2147483647	2147483647	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+1
+ global_queue_oneway 
+ global_calc_gamma 
+-2147483648	2147483647	-2147483648
+2147483647	-2147483648	-2147483648
+-2147483648	-2147483648	2147483647
+ global_queue_indexes_of_max 
+8	3	1
+ global_matrix_trunc 
+Matrix rank :	2
+2147483647	0
+0	2147483647
+ global_add_forbidden 
+2147483647	0
+0	2147483647
+ global_min_by_row 
+ global_sub_by_row 
+2147483647	0
+0	2147483647
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+2147483647	0
+0	2147483647
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+0
+ global_queue_oneway 
+ global_calc_gamma 
+-2147483648	2147483647
+2147483647	-2147483648
+ global_queue_indexes_of_max 
+2	1
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ Return from Recursion 
+ global_matrix_trunc 
+Matrix rank :	2
+0	2147483647
+2147483647	0
+ global_add_forbidden 
+0	2147483647
+2147483647	0
+ global_min_by_row 
+ global_sub_by_row 
+0	2147483647
+2147483647	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+0	2147483647
+2147483647	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+0
+ global_queue_oneway 
+ global_calc_gamma 
+2147483647	-2147483648
+-2147483648	2147483647
+ global_queue_indexes_of_max 
+3	0
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ Return from Recursion 
+ global_matrix_trunc 
+Matrix rank :	2
+0	2147483647
+2147483647	0
+ global_add_forbidden 
+0	2147483647
+2147483647	0
+ global_min_by_row 
+ global_sub_by_row 
+0	2147483647
+2147483647	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+0	2147483647
+2147483647	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+0
+ global_queue_oneway 
+ global_calc_gamma 
+2147483647	-2147483648
+-2147483648	2147483647
+ global_queue_indexes_of_max 
+3	0
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ Return from Recursion 
+ Return from Recursion 
+ global_matrix_trunc 
+Matrix rank :	3
+0	2147483647	2147483647
+0	1	2147483647
+0	2147483647	0
+ global_add_forbidden 
+0	2147483647	2147483647
+2147483647	1	2147483647
+0	2147483647	0
+ global_min_by_row 
+ global_sub_by_row 
+0	2147483647	2147483647
+2147483647	0	2147483647
+0	2147483647	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+0	2147483647	2147483647
+2147483647	0	2147483647
+0	2147483647	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+1
+ global_queue_oneway 
+ global_calc_gamma 
+0	-2147483648	-2147483648
+-2147483648	2147483647	-2147483648
+0	-2147483648	0
+ global_queue_indexes_of_max 
+4
+ global_matrix_trunc 
+Matrix rank :	2
+0	2147483647
+0	0
+ global_add_forbidden 
+0	2147483647
+0	0
+ global_min_by_row 
+ global_sub_by_row 
+0	2147483647
+0	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+0	2147483647
+0	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+0
+ global_queue_oneway 
+ global_calc_gamma 
+0	-2147483648
+0	0
+ global_queue_indexes_of_max 
+3	2	0
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ global_matrix_trunc 
+Matrix rank :	1
+2147483647
+ global_add_forbidden 
+2147483647
+ global_sum_lbound 
+Current Price	: 4007
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ Return from Recursion 
+ Return from Recursion 
+ global_matrix_trunc 
+Matrix rank :	3
+0	1	2147483647
+0	2147483647	2147483647
+0	2147483647	0
+ global_add_forbidden 
+2147483647	1	2147483647
+0	2147483647	2147483647
+0	2147483647	0
+ global_min_by_row 
+ global_sub_by_row 
+2147483647	0	2147483647
+0	2147483647	2147483647
+0	2147483647	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+2147483647	0	2147483647
+0	2147483647	2147483647
+0	2147483647	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+1
+ global_queue_oneway 
+ global_calc_gamma 
+-2147483648	2147483647	-2147483648
+0	-2147483648	-2147483648
+0	-2147483648	0
+ global_queue_indexes_of_max 
+1
+ global_matrix_trunc 
+Matrix rank :	2
+0	2147483647
+0	0
+ global_add_forbidden 
+0	2147483647
+0	0
+ global_min_by_row 
+ global_sub_by_row 
+0	2147483647
+0	0
+ global_sum_lbound_step 
+ global_min_by_col 
+ global_sub_by_col 
+0	2147483647
+0	0
+ global_sum_lbound_step 
+ global_sum_lbound_end 
+0
+ global_queue_oneway 
+ global_calc_gamma 
+0	-2147483648
+0	0
+ global_queue_indexes_of_max 
+3	2	0
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ global_matrix_trunc 
+Matrix rank :	1
+2147483647
+ global_add_forbidden 
+2147483647
+ global_sum_lbound 
+Current Price	: 4007
+ global_matrix_trunc 
+Matrix rank :	1
+0
+ global_add_forbidden 
+0
+ global_sum_lbound 
+Current Price	: 4007
+ Return from Recursion 
+ Return from Recursion 
+ Return from Recursion 
+ Return from Recursion 
+ Return from Recursion 
+Best Path	: (0,1),(1,2),(4,3),(2,0),(5,4),(3,5)
+Best Price	: 4007

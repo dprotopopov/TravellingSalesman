@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cudalittle", "cudalittle\cudalittle.vcxproj", "{183D8F15-6414-4E68-8EB0-B0CADC886F59}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mpilittle", "mpilittle\mpilittle.vcxproj", "{F400998F-171C-49BF-8311-E4E721102473}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{183D8F15-6414-4E68-8EB0-B0CADC886F59}.Debug|Win32.ActiveCfg = Debug|Win32
+		{183D8F15-6414-4E68-8EB0-B0CADC886F59}.Debug|Win32.Build.0 = Debug|Win32
+		{183D8F15-6414-4E68-8EB0-B0CADC886F59}.Release|Win32.ActiveCfg = Release|Win32
+		{183D8F15-6414-4E68-8EB0-B0CADC886F59}.Release|Win32.Build.0 = Release|Win32
+		{F400998F-171C-49BF-8311-E4E721102473}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F400998F-171C-49BF-8311-E4E721102473}.Debug|Win32.Build.0 = Debug|Win32
+		{F400998F-171C-49BF-8311-E4E721102473}.Release|Win32.ActiveCfg = Release|Win32
+		{F400998F-171C-49BF-8311-E4E721102473}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

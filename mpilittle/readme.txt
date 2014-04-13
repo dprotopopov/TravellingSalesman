@@ -5,7 +5,7 @@
 Использовать VS2010,VS2012 (версия VS2013 НЕ ПОДДЕРЖИВАЕТСЯ CUDA !!!!!!!), Express версии тоже не поддерживаются CUDA !!!!
 nvcc должен быть доступен для вызова
 Для компиляции
-nvcc -o little.exe little.cu
+nvcc -o cudalittle.exe little.cu
 Для выполнения
 little.exe
 

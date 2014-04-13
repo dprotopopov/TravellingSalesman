@@ -1,0 +1,9 @@
+D:\Projects\TravellingSalesman\TravellingSalesman\bin\Debug\TravellingSalesman.exe.config
+D:\Projects\TravellingSalesman\TravellingSalesman\bin\Debug\TravellingSalesman.exe
+D:\Projects\TravellingSalesman\TravellingSalesman\bin\Debug\TravellingSalesman.pdb
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\Debug\TravellingSalesman.MainForm.resources
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\Debug\TravellingSalesman.Properties.Resources.resources
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\Debug\TravellingSalesman.Settings.resources
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\Debug\TravellingSalesman.csproj.GenerateResource.Cache
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\Debug\TravellingSalesman.exe
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\Debug\TravellingSalesman.pdb

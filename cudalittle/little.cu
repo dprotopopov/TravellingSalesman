@@ -81,7 +81,7 @@ char *mystrtok(char **m, char *s, char c)
 #endif
 
 __global__ void global_queue_oneway_a(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
-	for (int id = n + blockDim.x*blockIdx.x + threadIdx.x; id < 2*n; id += blockDim.x*gridDim.x) {
+	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 2*n; id += blockDim.x*gridDim.x) {
 		slice[id] = 0;
 		if (id < n){
 			for (int i = 0; slice[id] < 2 && i < n; i++) {
@@ -100,7 +100,7 @@ __global__ void global_queue_oneway_a(int *queue, int *qsize, int *lbound, int *
 	}
 }
 __global__ void global_queue_oneway_b(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
-	for (int id = n + blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
+	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
 		for (int k = 0; k < 2 * n; k++){
 			if (slice[k] == 1){
 				if (k < n){
@@ -227,7 +227,7 @@ __global__ void global_next_by_row(int *queue, int *qsize, int *lbound, int *gam
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n; id += blockDim.x*gridDim.x) {
 		for (int i = 0; i < n; i++) {
 			if (matrix[i*n + id] != INT_MAX) {
-				slice[id] = max(slice[id], slice[i]);
+				slice[id] = max(slice[id], slice[i+n]);
 			}
 		}
 	}
@@ -236,7 +236,7 @@ __global__ void global_prev_by_col(int *queue, int *qsize, int *lbound, int *gam
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n; id += blockDim.x*gridDim.x) {
 		for (int j = 0; j < n; j++) {
 			if (matrix[id*n + j] != INT_MAX){
-				slice[id] = max(slice[id], slice[j]);
+				slice[id] = max(slice[id], slice[j+n]);
 			}
 		}
 	}
@@ -327,7 +327,7 @@ __host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice,
 	for (int i = 1; i <= n; i++) err = cudaMalloc((void**)&cols[i], i*sizeof(int));
 
 	err = cudaMalloc((void**)&m, 2 * sizeof(int));
-	err = cudaMalloc((void**)&slice, 2*n*sizeof(int*));
+	err = cudaMalloc((void**)&slice, 2*n*sizeof(int));
 	err = cudaMalloc((void**)&lbound ,(n + 1)*sizeof(int));
 	err = cudaMalloc((void**)&from, n*sizeof(int));
 	err = cudaMalloc((void**)&to, n*sizeof(int));
@@ -348,11 +348,15 @@ __host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice,
 	/* Проверяем граф на связанность по строкам */
 	global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
 	cudaMemcpy(slice, &value[1], sizeof(int), cudaMemcpyHostToDevice);
-	for (int i = 1; i <= n; i++) global_next_by_row << < blocks, threads >> >(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-	global_min_by_dim <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-	cudaMemcpy(value, m, sizeof(int), cudaMemcpyDeviceToHost);
+	for (int i = 1; i <= n; i++)
+	{
+		cudaMemcpy(&slice[n], slice, n*sizeof(int), cudaMemcpyDeviceToDevice);
+		global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+		global_next_by_row <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+	}
+	cudaMemcpy(value, slice, sizeof(int), cudaMemcpyDeviceToHost);
 	if (value[0] == 0) {
-		printf("Wrong Graph\n");
+		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
 		goto the_end;
 	}
 
@@ -360,11 +364,44 @@ __host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice,
 	/* Проверяем граф на связанность по столбцам */
 	global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
 	cudaMemcpy(slice, &value[1], sizeof(int), cudaMemcpyHostToDevice);
-	for (int i = 1; i <= n; i++) global_prev_by_col << < blocks, threads >> >(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-	global_min_by_dim <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+	for (int i = 1; i <= n; i++) {
+		cudaMemcpy(&slice[n], slice, n*sizeof(int), cudaMemcpyDeviceToDevice);
+		global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+		global_prev_by_col <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+	}
+	cudaMemcpy(value, slice, sizeof(int), cudaMemcpyDeviceToHost);
+	if (value[0] == 0) {
+		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
+		goto the_end;
+	}
+	printf(" Check Graph by rows \n");
+	/* Проверяем граф на связанность по строкам */
+	global_slice_clear << < blocks, threads >> >(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+	cudaMemcpy(slice, &value[1], sizeof(int), cudaMemcpyHostToDevice);
+	for (int i = 1; i <= n; i++)
+	{
+		cudaMemcpy(&slice[n], slice, n*sizeof(int), cudaMemcpyDeviceToDevice);
+		global_next_by_row <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+	}
+	global_min_by_dim << < 1, 1 >> >(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
 	cudaMemcpy(value, m, sizeof(int), cudaMemcpyDeviceToHost);
 	if (value[0] == 0) {
-		printf("Wrong Graph\n");
+		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
+		goto the_end;
+	}
+
+	printf(" Check Graph by columns \n");
+	/* Проверяем граф на связанность по столбцам */
+	global_slice_clear << < blocks, threads >> >(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+	cudaMemcpy(slice, &value[1], sizeof(int), cudaMemcpyHostToDevice);
+	for (int i = 1; i <= n; i++) {
+		cudaMemcpy(&slice[n], slice, n*sizeof(int), cudaMemcpyDeviceToDevice);
+		global_prev_by_col <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+	}
+	global_min_by_dim << < 1, 1 >> >(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+	cudaMemcpy(value, m, sizeof(int), cudaMemcpyDeviceToHost);
+	if (value[0] == 0) {
+		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
 		goto the_end;
 	}
 
@@ -502,23 +539,25 @@ __host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice,
 		}
 		else {
 
-			cudaMemcpy(from, rows[n], n*sizeof(int), cudaMemcpyDeviceToDevice);
-			cudaMemcpy(to, cols[n], n*sizeof(int), cudaMemcpyDeviceToDevice);
+			cudaMemcpy(value, matrix[n], sizeof(int), cudaMemcpyDeviceToHost);
+			if (value[0] != INT_MAX){
+				cudaMemcpy(from, rows[n], n*sizeof(int), cudaMemcpyDeviceToDevice);
+				cudaMemcpy(to, cols[n], n*sizeof(int), cudaMemcpyDeviceToDevice);
 
-			printf(" global_sum_lbound \n");
-			/* Суммируем Текущую Нижнюю Границу параллельно в процессах */
-			global_sum_lbound <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+				printf(" global_sum_lbound \n");
+				/* Суммируем Текущую Нижнюю Границу параллельно в процессах */
+				global_sum_lbound <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
 
 
-			/* Сравниваем текущую стоимость с ранее найденой лучшей стоимостью */
-			cudaMemcpy(value, m, sizeof(int), cudaMemcpyDeviceToHost);
-			if (value[0] < bestPrice[0]){
-				bestPrice[0] = value[0];
-				cudaMemcpy(bestFrom, from, rank * sizeof(int), cudaMemcpyDeviceToHost);
-				cudaMemcpy(bestTo, to, rank * sizeof(int), cudaMemcpyDeviceToHost);
+				/* Сравниваем текущую стоимость с ранее найденой лучшей стоимостью */
+				cudaMemcpy(value, m, sizeof(int), cudaMemcpyDeviceToHost);
+				if (value[0] < bestPrice[0]){
+					bestPrice[0] = value[0];
+					cudaMemcpy(bestFrom, from, rank * sizeof(int), cudaMemcpyDeviceToHost);
+					cudaMemcpy(bestTo, to, rank * sizeof(int), cudaMemcpyDeviceToHost);
+				}
+				printf("Current Price\t: %d\n", bestPrice[0]);
 			}
-			printf("Current Price\t: %d\n", bestPrice[0]);
-
 			n++;
 		}
 
@@ -588,13 +627,16 @@ the_end:
 
 int main(int argc, char* argv[])
 {
-	printf("Title :\t%s\n", title);
-	if (argc < 2) {
-		printf("Usage :\t%s <filename>\n", argv[0]);
+	printf("Title :\t%s\n", title); fflush(stdout);
+
+	if (argc < 3) {
+		printf("Usage :\t%s <inputfilename> <outputfilename>\n", argv[0]); fflush(stdout);
 		exit(-1);
 	}
 
-	char *fileName = argv[1];
+	char *inputFileName = argv[1];
+	char *outputFileName = argv[2];
+
 	char buffer[4096];
 	char *tok;
 	char *p;
@@ -605,14 +647,14 @@ int main(int argc, char* argv[])
 	int *bestFrom; /* Стек дуг (индексов) в порядке их удаления из матрицы */
 	int *bestTo;   /* Стек дуг (индексов) в порядке их удаления из матрицы */
 
-	printf("File name :\t%s\n", fileName);
+	printf("Input File Name :\t%s\n", inputFileName); fflush(stdout);
+	printf("Output File Name :\t%s\n", outputFileName); fflush(stdout);
 
-	FILE *fs = fopen(fileName, "r");
+	FILE *fs = fopen(inputFileName, "r");
 	if (fs == NULL) {
-		printf("File open error (%s)\n", argv[1]);
+		fprintf(stderr, "File open error (%s)\n", inputFileName); fflush(stderr);
 		exit(-1);
 	}
-
 
 	n = 0;
 
@@ -659,6 +701,7 @@ int main(int argc, char* argv[])
 			printf("%d%s", matrix[i*n + j], ((j == n - 1) ? "\n" : "\t"));
 		}
 	}
+	fflush(stdout);
 
 	// Find/set the device.
 	int device_qsize = 0;
@@ -667,7 +710,7 @@ int main(int argc, char* argv[])
 	{
 		cudaDeviceProp properties;
 		cudaGetDeviceProperties(&properties, i);
-		printf( "Running on GPU %d (%s)\n", i, properties.name);
+		printf("Running on GPU %d (%s)\n", i, properties.name); fflush(stdout);
 	}
 
 	host_little(matrix, bestFrom, bestTo, &bestPrice, n);
@@ -675,12 +718,26 @@ int main(int argc, char* argv[])
 	cudaDeviceReset();
 
 	/* Bыводим результаты */
-	printf("Best Path\t: "); for (int i = 0; i < n; i++) printf("(%d,%d)%s", bestFrom[i], bestTo[i], ((i < (n - 1)) ? "," : "\n"));
-	printf("Best Price\t: %d\n", bestPrice);
+	if (bestPrice != INT_MAX){
+		printf("Best Path\t: "); for (int i = 0; i < n; i++) printf("(%d,%d)%s", bestFrom[i], bestTo[i], ((i < (n - 1)) ? "," : "\n"));
+		printf("Best Price\t: %d\n", bestPrice);
+
+		fs = fopen(outputFileName, "w");
+		if (fs == NULL) {
+			fprintf(stderr, "File open error (%s)\n", outputFileName); fflush(stderr);
+			exit(-1);
+		}
+		for (int i = 0; i < n; i++) fprintf(fs, "%d;%d\n", bestFrom[i], bestTo[i]);
+		fclose(fs);
+	}
 
 
 	free(matrix);
 	free(bestFrom);
 	free(bestTo);
+
+	fflush(stdout);
+
+	if (bestPrice == INT_MAX) exit(-1);
 	exit(0);
 }

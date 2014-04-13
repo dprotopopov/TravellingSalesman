@@ -18,11 +18,11 @@
     <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="little.c">
-      <Filter>Файлы исходного кода</Filter>
-    </ClCompile>
+    <None Include="1.csv" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="1.csv" />
+    <ClCompile Include="little.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

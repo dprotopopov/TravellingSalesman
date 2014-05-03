@@ -25,16 +25,17 @@ char *description = "Алгоритм Литтла - метод решения �
 Алгоритм Литтла
 
 В каждой строке матрицы стоимости найдем минимальный элемент и вычтем его из всех элементов строки. 
-Сделаем это и для столбцов, не содержащих нуля. 
+Сделаем это и для столбцов. 
 Получим матрицу стоимости, каждая строка и каждый столбец которой содержат хотя бы один нулевой элемент.
 Для каждого нулевого элемента матрицы cij  рассчитаем коэффициент Гi,j, который равен сумме наименьшего элемента i строки 
 (исключая элемент Сi,j=0) и наименьшего элемента j столбца. 
-Из всех коэффициентов  Гi,j выберем такой, который является максимальным Гk,l=max{Гi,j}. 
+Проверяем, что не существует однозначных путей - то есть с одним входом и выходом
+Если такой путь есть, то выбираем его
+иначе Из всех коэффициентов  Гi,j выберем такой, который является максимальным Гk,l=max{Гi,j}. 
 В гамильтонов контур вносится соответствующая дуга (k,l).
 Удаляем k-тую строку и столбец l, поменяем на бесконечность значение элемента Сl,k (поскольку дуга (k,l) включена в контур, 
 то обратный путь из l в k недопустим).
-Повторяем алгоритм шага 1, пока порядок матрицы не станет равным двум.
-Затем в текущий ориентированный граф вносим две недостающие дуги, определяющиеся однозначно матрицей прядка 2. 
+Повторяем алгоритм шага 1, пока порядок матрицы не станет равным одному.
 Получаем гамильтонов контур.
 В ходе решения ведется постоянный подсчет текущего значения нижней границы. 
 Нижняя граница равна сумме всех вычтенных элементов в строках и столбцах. 
@@ -378,6 +379,9 @@ void _mpi_sum_lbound(int *queue, int *qsize, int *lbound, int *gamma, int *slice
 	/* Копируем брэдкастом сумму в дочерние процессы */
 	MPI_Bcast(&m[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
 }
+void _mpi_add_lbound(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+	lbound[n] += matrix[n][queue[qsize[n]]];
+}
 void _mpi_sum_lbound_begin(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	lbound[n] = 0;
 }
@@ -574,11 +578,15 @@ int main(int argc, char *argv[])
 		_mpi_join_max_slice(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 	}
 	if (myrank == 0 && slice[0] == 0) {
-		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
+		fprintf(stderr, "Wrong Graph\n"); 
+		fflush(stderr);
 		exit(-1);
 	}
 
-	if (myrank == 0) printf(" Check Graph by rows \n"); fflush(stdout);
+	if (myrank == 0) {
+		printf(" Check Graph by rows \n");
+		fflush(stdout);
+	}
 	/* Проверяем граф на связанность по строкам */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 	memset(slice, 0, n*sizeof(int));
@@ -590,11 +598,15 @@ int main(int argc, char *argv[])
 	}
 	_mpi_min_by_dim(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 	if (myrank == 0 && m[0] == 0) {
-		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
+		fprintf(stderr, "Wrong Graph\n"); 
+		fflush(stderr);
 		exit(-1);
 	}
 
-	if (myrank == 0) printf(" Check Graph by columns \n"); fflush(stdout);
+	if (myrank == 0) {
+		printf(" Check Graph by columns \n");
+		fflush(stdout);
+	}
 	/* Проверяем граф на связанность по столбцам */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 	memset(slice, 0, n*sizeof(int));
@@ -606,38 +618,55 @@ int main(int argc, char *argv[])
 	}
 	_mpi_min_by_dim(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 	if (myrank == 0 && m[0] == 0) {
-		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
+		fprintf(stderr, "Wrong Graph\n"); 
+		fflush(stderr);
 		exit(-1);
 	}
 
 	if (myrank == 0) {
 		printf("Graph is ok\n");
+		fflush(stdout);
 	}
 
 	while ( n > 0 && n <= rank ) {
-		if (myrank == 0) printf("Matrix rank :\t%d\n", n);
-		if (myrank == 0) for (i = 0; i < n; i++){
-			for (j = 0; j < n; j++){
-				printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+		if (myrank == 0) {
+			printf("Matrix rank :\t%d\n", n); 
+			fflush(stdout);
+		}
+		if (myrank == 0) {
+			for (i = 0; i < n; i++){
+				for (j = 0; j < n; j++){
+					printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+				}
 			}
+			fflush(stdout);
 		}
 
 		_mpi_sum_lbound_begin(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 		
-		if (myrank == 0) printf(" _mpi_add_forbidden \n");
+		if (myrank == 0) {
+			printf(" _mpi_add_forbidden \n");
+			fflush(stdout);
+		}
 		/* Запрещаем обратные переходы */
 		_mpi_add_forbidden(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 
-		if (myrank == 0) for (i = 0; i < n; i++){
-			for (j = 0; j < n; j++){
-				printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+		if (myrank == 0) {
+			for (i = 0; i < n; i++){
+				for (j = 0; j < n; j++){
+					printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+				}
 			}
+			fflush(stdout);
 		}
 
 		if (n > 1)  {
 			qsize[n] = qsize[n + 1];
 
-			if (myrank == 0) printf(" _mpi_min_by_row \n");
+			if (myrank == 0) {
+				printf(" _mpi_min_by_row \n");
+				fflush(stdout);
+			}
 			/* Находим минимальные значения в строках матрицы параллельно в процессах */
 			/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 			/* Собираем последовательным опросом дочерних процессов уменьшенные значения в хост-процессе */
@@ -647,7 +676,10 @@ int main(int argc, char *argv[])
 			_mpi_check_infinity(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 			if (m[0] == 0) {
 
-				if (myrank == 0) printf(" _mpi_sub_by_row \n");
+				if (myrank == 0) {
+					printf(" _mpi_sub_by_row \n");
+					fflush(stdout);
+				}
 				/* Вычитаем минимальные значения из строк параллельно в процессах */
 				/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 				/* Собираем последовательным опросом дочерних процессов уменьшенные значения в хост-процессе */
@@ -655,19 +687,28 @@ int main(int argc, char *argv[])
 				_mpi_sub_by_row(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 				_mpi_join_matrix(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 
-				if (myrank == 0) for (i = 0; i < n; i++){
-					for (j = 0; j < n; j++){
-						printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+				if (myrank == 0) {
+					for (i = 0; i < n; i++){
+						for (j = 0; j < n; j++){
+							printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+						}
 					}
+					fflush(stdout);
 				}
 
-				if (myrank == 0) printf(" _mpi_sum_lbound_step \n");
+				if (myrank == 0) {
+					printf(" _mpi_sum_lbound_step \n");
+					fflush(stdout);
+				}
 				/* Находим сумму минимальных значений в строках матрицы параллельно в процессах */
 				/* Каждый процесс обрабатывает подмножество из n / nrank элементов */
 				_mpi_sum_lbound_step(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 			}
 
-			if (myrank == 0) printf(" _mpi_min_by_col \n");
+			if (myrank == 0) {
+				printf(" _mpi_min_by_col \n");
+				fflush(stdout);
+			}
 			/* Находим минимальные значения в столбцах матрицы параллельно в процессах */
 			/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 			/* Собираем последовательным опросом дочерних процессов уменьшенные значения в хост-процессе */
@@ -677,7 +718,10 @@ int main(int argc, char *argv[])
 			_mpi_check_infinity(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 			if (m[0] == 0) {
 
-				if (myrank == 0) printf(" _mpi_sub_by_col \n");
+				if (myrank == 0) {
+					printf(" _mpi_sub_by_col \n");
+					fflush(stdout);
+				}
 				/* Вычитаем минимальные значения из столбцов параллельно в процессах */
 				/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 				/* Собираем последовательным опросом дочерних процессов уменьшенные значения в хост-процессе */
@@ -685,38 +729,59 @@ int main(int argc, char *argv[])
 				_mpi_sub_by_col(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 				_mpi_join_matrix(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 
-				if (myrank == 0) for (i = 0; i < n; i++){
-					for (j = 0; j < n; j++){
-						printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+				if (myrank == 0) {
+					for (i = 0; i < n; i++){
+						for (j = 0; j < n; j++){
+							printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+						}
 					}
+					fflush(stdout);
 				}
 
-				if (myrank == 0) printf(" _mpi_sum_lbound_step \n");
+				if (myrank == 0) {
+					printf(" _mpi_sum_lbound_step \n");
+					fflush(stdout);
+				}
 				/* Находим сумму минимальных значений в столбцах матрицы параллельно в процессах */
 				/* Каждый процесс обрабатывает подмножество из n / nrank элементов */
 				_mpi_sum_lbound_step(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 			}
 
-			if (myrank == 0) printf(" _mpi_sum_lbound_end \n");
+			if (myrank == 0) {
+				printf(" _mpi_sum_lbound_end \n");
+				fflush(stdout);
+			}
 			/* Собираем последовательным опросом дочерних процессов Текущую Нижнюю Границу в хост-процессе */
 			/* Копируем брэдкастом Текущую Нижнюю Границу в дочерние процессы */
 			_mpi_sum_lbound_end(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-			if (myrank == 0) printf("%d\n", lbound[n]);
+			if (myrank == 0) {
+				printf("%d\n", lbound[n]);
+				fflush(stdout);
+			}
 
-			if (myrank == 0) printf(" _mpi_queue_oneway \n");
+			if (myrank == 0) {
+				printf(" _mpi_queue_oneway \n");
+				fflush(stdout);
+			}
 			/* Находим все индексы максимального коэффициента параллельно в процессах */
 			/* Каждый процесс обрабатывает подмножество матрицы из n / nrank элементов */
 			_mpi_queue_oneway(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-
-			if (myrank == 0) for (i = qsize[n]; i < qsize[n + 1]; i++) printf("%d%s", queue[i], (i == qsize[n + 1] - 1) ? "\n" : "\t");
 
 			/* Собираем последовательным опросом дочерних процессов все индексы максимального коэффициента в хост-процессе */
 			/* Список сохраняется в стеке индексов */
 			/* Копируем брэдкастом все индексы максимального коэффициента в дочерние процессы */
 			_mpi_join_queue(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 
+			if (myrank == 0) {
+				for (i = qsize[n]; i < qsize[n + 1]; i++) printf("%d%s", queue[i], (i == qsize[n + 1] - 1) ? "\n" : "\t");
+				fflush(stdout);
+			}
+
 			if (qsize[n] == qsize[n + 1]){
-				if (myrank == 0) printf(" _mpi_calc_gamma \n");
+				if (myrank == 0) {
+					printf(" _mpi_calc_gamma \n");
+					fflush(stdout);
+				}
 				/* Расчитываем коэффициенты параллельно в процессах */
 				/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 				/* Собираем последовательным опросом дочерних процессов коэффициенты в хост-процессе */
@@ -724,10 +789,13 @@ int main(int argc, char *argv[])
 				_mpi_calc_gamma(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 				_mpi_join_gamma(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 
-				if (myrank == 0) for (i = 0; i < n; i++){
-					for (j = 0; j < n; j++){
-						printf("%d%s", gamma[i*n + j], ((j == n - 1) ? "\n" : "\t"));
+				if (myrank == 0) {
+					for (i = 0; i < n; i++){
+						for (j = 0; j < n; j++){
+							printf("%d%s", gamma[i*n + j], ((j == n - 1) ? "\n" : "\t"));
+						}
 					}
+					fflush(stdout);
 				}
 
 				/* Находим максимальный индекс максимального коэффициента параллельно в процессах */
@@ -738,7 +806,10 @@ int main(int argc, char *argv[])
 
 				if (m[1] != INT_MIN)
 				{
-					if (myrank == 0) printf(" _mpi_queue_indexes_of_max \n");
+					if (myrank == 0) {
+						printf(" _mpi_queue_indexes_of_max \n");
+						fflush(stdout);
+					}
 					/* Находим все индексы максимального коэффициента параллельно в процессах */
 					/* Каждый процесс обрабатывает подмножество матрицы из m / nrank элементов */
 					/* Собираем последовательным опросом дочерних процессов все индексы максимального коэффициента в хост-процессе */
@@ -756,6 +827,11 @@ int main(int argc, char *argv[])
 			}
 			else {
 				qsize[n] = qsize[n + 1] - 1;
+				if (myrank == 0) {
+					printf(" _mpi_add_lbound \n");
+					fflush(stdout);
+				}
+				_mpi_add_lbound(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
 			}
 
 			/* Теперь все индексы должны быть рекурсивно обработаны */
@@ -768,7 +844,10 @@ int main(int argc, char *argv[])
 				memmove(to, cols[n], n*sizeof(int));
 
 
-				if (myrank == 0) printf(" _mpi_sum_lbound \n");
+				if (myrank == 0) {
+					printf(" _mpi_sum_lbound \n");
+					fflush(stdout);
+				}
 				/* Суммируем Текущую Нижнюю Границу параллельно в процессах */
 				/* Каждый процесс обрабатывает подмножество из N / nrank элементов */
 				/* Копируем брэдкастом сумму в дочерние процессы */
@@ -781,7 +860,10 @@ int main(int argc, char *argv[])
 					memmove(bestFrom, from, rank*sizeof(int));
 					memmove(bestTo, to, rank*sizeof(int));
 				}
-				if (myrank == 0) printf("Current Price\t: %d\n", bestPrice);
+				if (myrank == 0) {
+					printf("Current Price\t: %d\n", bestPrice);
+					fflush(stdout);
+				}
 			}
 			n++;
 		}
@@ -789,7 +871,10 @@ int main(int argc, char *argv[])
 		/* Возврат из "рекурсивного" вызова */
 		/* Чтобы не делать рекурсивные обходы работаем только с объявленным стеком */
 		while ((n <= rank) && (qsize[n] == qsize[n + 1])) {
-			if (myrank == 0) printf(" Return from Recursion \n");
+			if (myrank == 0) {
+				printf(" Return from Recursion \n");
+				fflush(stdout);
+			}
 			n++;
 		}
 		if (n > rank) break;
@@ -820,6 +905,7 @@ int main(int argc, char *argv[])
 	if (myrank == 0 && bestPrice != INT_MAX) {
 		printf("Best Path\t: "); for (i = 0; i < n; i++) printf("(%d,%d)%s", bestFrom[i], bestTo[i], ((i < (n - 1)) ? "," : "\n"));
 		printf("Best Price\t: %d\n", bestPrice);
+		fflush(stdout);
 
 		FILE *fs = fopen(outputFileName, "w");
 		if (fs == NULL) {
@@ -850,8 +936,7 @@ int main(int argc, char *argv[])
 	free(m);
 
 	MPI_Finalize(); 
-	fflush(stdout);
 
-	if (bestPrice == INT_MAX) exit(-1);
+	if (myrank == 0 && bestPrice == INT_MAX) exit(-1);
 	exit(0);
 } 

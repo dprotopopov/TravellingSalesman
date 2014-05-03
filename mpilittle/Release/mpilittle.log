@@ -1,4 +1,4 @@
-﻿Сборка начата 14.04.2014 1:44:28.
+﻿Сборка начата 03.05.2014 14:24:12.
      1>Проект "D:\Projects\TravellingSalesman\mpilittle\mpilittle.vcxproj" в узле 2 (целевые объекты Rebuild).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /Od /Oy- /Gm- /EHsc /MD /GS- /Gy- /fp:precise /Zc:wchar_t- /Zc:forScope /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt little.cpp
@@ -11,4 +11,4 @@
 
 Сборка успешно завершена.
 
-Затраченное время: 00:00:00.38
+Затраченное время: 00:00:00.54

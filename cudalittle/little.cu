@@ -50,6 +50,7 @@ char *description = "Алгоритм Литтла - метод решения �
 #include <limits.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 #define assert( bool ) 
 int strempty(const char *p)
@@ -81,39 +82,39 @@ char *mystrtok(char **m, char *s, char c)
 #define min( a, b ) ( ((a) < (b)) ? (a) : (b) )
 #endif
 
-__global__ void global_queue_oneway_a(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_queue_oneway_a(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 2*n; id += blockDim.x*gridDim.x) {
-		slice[id] = 0;
+		islice[id] = 0;
 		if (id < n){
-			for (int i = 0; slice[id] < 2 && i < n; i++) {
-				if (matrix[i*n + id] != INT_MAX) {
-					slice[id]++;
+			for (int i = 0; islice[id] < 2 && i < n; i++) {
+				if (matrix[i*n + id] != LONG_MAX) {
+					islice[id]++;
 				}
 			}
 		}
 		else {
-			for (int j = 0; m[0] < 2 && j < n; j++) {
-				if (matrix[(id - n)*n + j] != INT_MAX) {
-					slice[id]++;
+			for (int j = 0; im[0] < 2 && j < n; j++) {
+				if (matrix[(id - n)*n + j] != LONG_MAX) {
+					islice[id]++;
 				}
 			}
 		}
 	}
 }
-__global__ void global_queue_oneway_b(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_queue_oneway_b(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
 		for (int k = 0; k < 2 * n; k++){
-			if (slice[k] == 1){
+			if (islice[k] == 1){
 				if (k < n){
 					int i; for (i = 0; i < n; i++){
-						if (matrix[i*n + k] != INT_MAX)
+						if (matrix[i*n + k] != LONG_MAX)
 							break;
 					}
 					queue[--qsize[n]] = i*n + k;
 				}
 				else {
 					int j; for (j = 0; j < n; j++){
-						if (matrix[(k - n)*n + j] != INT_MAX) 
+						if (matrix[(k - n)*n + j] != LONG_MAX) 
 							break;
 					}
 					queue[--qsize[n]] = (k - n)*n + j;
@@ -122,174 +123,181 @@ __global__ void global_queue_oneway_b(int *queue, int *qsize, int *lbound, int *
 		}
 	}
 }
-__global__ void global_add_forbidden(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_add_forbidden(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = n + blockDim.x*blockIdx.x + threadIdx.x; id < rank; id += blockDim.x*gridDim.x) {
 		int i; for (i = n; i-- > 0;) if (rows[i] == to[id]) break; /* Номер строки */
 		int j; for (j = n; j-- > 0;) if (cols[j] == from[id]) break; /* Номер столбца */
-		if (i != -1 && j != -1) matrix[i*n + j] = INT_MAX;
+		if (i != -1 && j != -1) matrix[i*n + j] = LONG_MAX;
 	}
 }
-__global__ void global_matrix_trunc(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_matrix_trunc(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	/* Удаляем строку и столбец параллельно в процессах */
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < (n - 1)*(n - 1); id += blockDim.x*gridDim.x) {
 		int i = id / (n - 1); /* Номер строки */
 		int j = id % (n - 1); /* Номер столбца */
-		if (i < m[0] && j < m[1]) matrix_1[id] = matrix[(i + 0)*n + j + 0];
-		else if (i >= m[0] && j < m[1]) matrix_1[id] = matrix[(i + 1)*n + j + 0];
-		else if (i < m[0] && j >= m[1]) matrix_1[id] = matrix[(i + 0)*n + j + 1];
-		else if (i >= m[0] && j >= m[1]) matrix_1[id] = matrix[(i + 1)*n + j + 1];
+		if (i < im[0] && j < im[1]) matrix_1[id] = matrix[(i + 0)*n + j + 0];
+		else if (i >= im[0] && j < im[1]) matrix_1[id] = matrix[(i + 1)*n + j + 0];
+		else if (i < im[0] && j >= im[1]) matrix_1[id] = matrix[(i + 0)*n + j + 1];
+		else if (i >= im[0] && j >= im[1]) matrix_1[id] = matrix[(i + 1)*n + j + 1];
 	}
 }
-__global__ void global_queue_indexes_of_max(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_queue_indexes_of_max(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	/* Находим все индексы максимального коэффициента параллельно в процессах */
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
-		for (int i = 0; i < (m[0] + 1); i++) {
-			if (m[1] == gamma[i]) queue[--qsize[n]] = i;
+		for (int i = 0; i < (im[0] + 1); i++) {
+			if (lm[1] == gamma[i]) queue[--qsize[n]] = i;
 		}
 	}
 }
-__global__ void global_gamma_max_index_of_max_a(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_gamma_max_index_of_max_a(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n; id += blockDim.x*gridDim.x) {
-		slice[id] = id*n; slice[n + id] = gamma[slice[id]];
+		islice[id] = id*n; 
+		lslice[n + id] = gamma[islice[id]];
 		for (int i = 1; i < n; i++) {
-			if (slice[n + id] <= gamma[id*n + i]) {
-				slice[id] = id*n + i;
-				slice[n + id] = gamma[slice[id]];
+			if (lslice[n + id] <= gamma[id*n + i]) {
+				islice[id] = id*n + i;
+				lslice[n + id] = gamma[islice[id]];
 			}
 		}
 	}
 }
-__global__ void global_gamma_max_index_of_max_b(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_gamma_max_index_of_max_b(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
-		m[0] = slice[0]; m[1] = slice[n];
+		im[0] = islice[0]; 
+		lm[1] = lslice[n];
 		for (int i = 1; i < n; i++) {
-			if ((m[1]  < slice[n + i]) || ((m[1] == slice[n + i]) && (m[0] < slice[i]))) {
-				m[0] = slice[i];
-				m[1] = slice[n + i];
+			if ((lm[1]  < lslice[n + i]) || ((lm[1] == lslice[n + i]) && (im[0] < islice[i]))) {
+				im[0] = islice[i];
+				lm[1] = lslice[n + i];
 			}
 		}
 	}
 }
-__global__ void global_calc_gamma(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_calc_gamma(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	/* Расчитываем коэффициенты параллельно в процессах */
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n*n; id += blockDim.x*gridDim.x) {
 		if (matrix[id] == 0) {
 			int i = id / n; /* Номер строки */
 			int j = id % n; /* Номер столбца */
-			int x = matrix[i*n + ((j + 1) % n)]; /* Берём следующий элемент в качестве начального */
-			int y = matrix[((i + 1) % n)*n + j]; /* Берём следующий элемент в качестве начального */
+			long x = matrix[i*n + ((j + 1) % n)]; /* Берём следующий элемент в качестве начального */
+			long y = matrix[((i + 1) % n)*n + j]; /* Берём следующий элемент в качестве начального */
 			for (int k = 2; k < n; k++){
 				x = min(x, matrix[i*n + ((j + k) % n)]);
 				y = min(y, matrix[((i + k) % n)*n + j]);
 			}
-			if ((x == INT_MAX) && (y == INT_MAX)) gamma[id] = INT_MAX; /* Из города не въехать и не выехать */
-			else if (x == INT_MAX) gamma[id] = y; /* Из города не въехать */
-			else if (y == INT_MAX) gamma[id] = x; /* Из города не выехать */
+			if ((x == LONG_MAX) && (y == LONG_MAX)) gamma[id] = LONG_MAX; /* Из города не въехать и не выехать */
+			else if (x == LONG_MAX) gamma[id] = y; /* Из города не въехать */
+			else if (y == LONG_MAX) gamma[id] = x; /* Из города не выехать */
 			else gamma[id] = x + y;
 		}
-		else gamma[id] = INT_MIN;
+		else gamma[id] = LONG_MIN;
 	}
 }
-__global__ void global_sub_by_row(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_sub_by_row(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	/* Находим минимальные значения в строках матрицы параллельно в процессах */
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n*n; id += blockDim.x*gridDim.x) {
 		int i = id / n; /* Номер строки */
-		if (matrix[id] != INT_MAX) 
-			matrix[id] -= slice[i];
+		if (matrix[id] != LONG_MAX) 
+			matrix[id] -= lslice[i];
 	}
 }
-__global__ void global_sub_by_col(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_sub_by_col(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	/* Находим минимальные значения в строках матрицы параллельно в процессах */
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n*n; id += blockDim.x*gridDim.x) {
 		int j = id % n; /* Номер столбца */
-		if (matrix[id] != INT_MAX) 
-			matrix[id] -= slice[j];
+		if (matrix[id] != LONG_MAX) 
+			matrix[id] -= lslice[j];
 	}
 }
-__global__ void global_min_by_col(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_min_by_col(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	/* Находим минимальные значения в колонках матрицы параллельно в процессах */
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n; id += blockDim.x*gridDim.x) {
-		slice[id] = matrix[id];
+		lslice[id] = matrix[id];
 		for (int i = 1; i < n; i++) {
-			slice[id] = min(slice[id], matrix[i*n + id]);
+			lslice[id] = min(lslice[id], matrix[i*n + id]);
 		}
 	}
 }
-__global__ void global_min_by_row(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_min_by_row(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	/* Находим минимальные значения в строках матрицы параллельно в процессах */
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n; id += blockDim.x*gridDim.x) {
-		slice[id] = matrix[id*n];
+		lslice[id] = matrix[id*n];
 		for (int j = 1; j < n; j++) {
-			slice[id] = min(slice[id], matrix[id*n + j]);
+			lslice[id] = min(lslice[id], matrix[id*n + j]);
 		}
 	}
 }
-__global__ void global_next_by_row(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_next_by_row(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n; id += blockDim.x*gridDim.x) {
 		for (int i = 0; i < n; i++) {
-			if (matrix[i*n + id] != INT_MAX) {
-				slice[id] = max(slice[id], slice[i+n]);
+			if (matrix[i*n + id] != LONG_MAX) {
+				lslice[id] = max(lslice[id], lslice[i+n]);
+				islice[id] = max(islice[id], islice[i+n]);
 			}
 		}
 	}
 }
-__global__ void global_prev_by_col(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_prev_by_col(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n; id += blockDim.x*gridDim.x) {
 		for (int j = 0; j < n; j++) {
-			if (matrix[id*n + j] != INT_MAX){
-				slice[id] = max(slice[id], slice[j+n]);
+			if (matrix[id*n + j] != LONG_MAX){
+				lslice[id] = max(lslice[id], lslice[j+n]);
+				islice[id] = max(islice[id], islice[j+n]);
 			}
 		}
 	}
 }
 
-__global__ void global_min_by_dim(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_min_by_dim(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
-		m[0] = slice[0];
+		lm[0] = lslice[0];
+		im[0] = islice[0];
 		for (int i = 1; i < n; i++){
-			m[0] = min(m[0], slice[i]);
+			lm[0] = min(lm[0], lslice[i]);
+			im[0] = min(im[0], islice[i]);
 		}
 	}
 }
-__global__ void global_sum_lbound(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_sum_lbound(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
-		m[0] = 0;
+		lm[0] = 0;
 		for (int i = 1; i < n; i++) {
 			lbound[i] = matrix[(n - 1)*i];
 		}
 		for (int i = 1; i <= rank; i++){
-			m[0] += lbound[i];
+			lm[0] += lbound[i];
 		}
 	}
 }
-__global__ void global_add_lbound(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_add_lbound(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
-		lbound[n] += matrix[queue[n]];
+		lbound[n] += matrix[queue[qsize[n]]];
 	}
 }
-__global__ void global_sum_lbound_begin(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_sum_lbound_begin(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
 		lbound[n] = 0;
 	}
 }
-__global__ void global_sum_lbound_step(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_sum_lbound_step(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
-		for (int i = 0; i < n; i++) lbound[n] += slice[i];
+		for (int i = 0; i < n; i++) lbound[n] += lslice[i];
 	}
 }
-__global__ void global_slice_clear(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_slice_clear(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n; id += blockDim.x*gridDim.x) {
-		slice[id] = 0;
+		islice[id] = 0;
+		lslice[id] = 0;
 	}
 }
-__global__ void global_sum_lbound_end(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_sum_lbound_end(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 }
-__global__ void global_check_infinity(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_check_infinity(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
-		m[0] = 0; for (int i = 0; m[0] == 0 && i < n; i++) if (slice[i] == INT_MAX) m[0] = 1;
+		im[0] = 0; for (int i = 0; im[0] == 0 && i < n; i++) if (lslice[i] == LONG_MAX) im[0] = 1;
 	}
 }
-__global__ void global_initialize(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int *matrix_1, int *matrix, int *rows, int *cols, int *from, int *to, int *m, int n, int rank){
+__global__ void global_initialize(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
 		lbound[0] = 0;
 		for (int i = 0; i < n; i++) rows[i] = i;
@@ -301,112 +309,119 @@ __global__ void global_initialize(int *queue, int *qsize, int *lbound, int *gamm
 /*
 	В случае неправильных параметров возвращённая лучшая цена имеет отрицвтельное значение
 */
-__host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice, int rank)
+__host__ void host_little(long *data, int *bestFrom, int *bestTo, long *bestPrice, int rank)
 {
 	cudaError_t err;
 	int n;         /* Ранг текущего массива */
-	int **matrix;  /* Стек массивов элементов */
+	long **matrix;  /* Стек массивов элементов */
 	int **rows;  /* Стек массивов элементов */
 	int **cols;  /* Стек массивов элементов */
-	int *gamma;    /* Массив коэффициентов */
+	long *gamma;    /* Массив коэффициентов */
 	int *queue;    /* Стек очередей индексов элементов */
 	int *qsize;    /* Размер очередей индексов элементов */
-	int *lbound;   /* Стек вычисленных нижних границ */
+	long *lbound;   /* Стек вычисленных нижних границ */
 	/* Стеки дуг (индексов) хранятся в порядке их удаления из матрицы */
 	/* Индексы записаны в соответствии с текущим размером матрицы */
 	/* и требуют пересчёта в исходный размер матрицы */
 	int *from; /* Стек дуг (индексов) в порядке их удаления из матрицы */
 	int *to;   /* Стек дуг (индексов) в порядке их удаления из матрицы */
-	int *m;
-	int *slice;
-	int value[2];
-	int *buffer;
+	int *im;
+	long *lm;
+	int *islice;
+	long *lslice;
+	int ivalue[2];
+	long lvalue[2];
+	int *ibuffer;
+	long *lbuffer;
 
 	n = rank;
 
-	buffer = (int*)malloc(n*n*sizeof(int));
-	matrix = (int**)malloc((n + 1)*sizeof(int*));
+	ibuffer = (int*)malloc(n*n*sizeof(int));
+	lbuffer = (long*)malloc(n*n*sizeof(long));
+	matrix = (long**)malloc((n + 1)*sizeof(long*));
 	rows = (int**)malloc((n + 1)*sizeof(int*));
 	cols = (int**)malloc((n + 1)*sizeof(int*));
-	for (int i = 1; i <= n; i++) err = cudaMalloc((void**)&matrix[i], i*i*sizeof(int));
+	for (int i = 1; i <= n; i++) err = cudaMalloc((void**)&matrix[i], i*i*sizeof(long));
 	for (int i = 1; i <= n; i++) err = cudaMalloc((void**)&rows[i], i*sizeof(int));
 	for (int i = 1; i <= n; i++) err = cudaMalloc((void**)&cols[i], i*sizeof(int));
 
-	err = cudaMalloc((void**)&m, 2 * sizeof(int));
-	err = cudaMalloc((void**)&slice, 2*n*sizeof(int));
-	err = cudaMalloc((void**)&lbound ,(n + 1)*sizeof(int));
+	err = cudaMalloc((void**)&im, 2 * sizeof(int));
+	err = cudaMalloc((void**)&lm, 2 * sizeof(long));
+	err = cudaMalloc((void**)&islice, 2*n*sizeof(int));
+	err = cudaMalloc((void**)&lslice, 2*n*sizeof(long));
+	err = cudaMalloc((void**)&lbound ,(n + 1)*sizeof(long));
 	err = cudaMalloc((void**)&from, n*sizeof(int));
 	err = cudaMalloc((void**)&to, n*sizeof(int));
 	err = cudaMalloc((void**)&queue, n*n*n * sizeof(int));
 	err = cudaMalloc((void**)&qsize ,(n + 2)*sizeof(int));
-	err = cudaMalloc((void**)&gamma,n*n*sizeof(int));
+	err = cudaMalloc((void**)&gamma,n*n*sizeof(long));
 
 	cudaMemcpy(matrix[n], data, n*n*sizeof(int), cudaMemcpyHostToDevice);
 
-	global_initialize <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-	*bestPrice = INT_MAX;
+	global_initialize <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+	*bestPrice = LONG_MAX;
 
 	int blocks = min(max(1, (int)pow((double)rank, 0.333333333333333)), 15);
 	int threads = min(max(1, (int)pow((double)rank, 0.333333333333333)), 15);
 
-	value[1] = 1;
+	ivalue[1] = 1;
 	printf(" Check Graph by rows \n");
 	/* Проверяем граф на связанность по строкам */
-	global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-	cudaMemcpy(slice, &value[1], sizeof(int), cudaMemcpyHostToDevice);
+	global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+	cudaMemcpy(islice, &ivalue[1], sizeof(int), cudaMemcpyHostToDevice);
 	for (int i = 1; i <= n; i++)
 	{
-		cudaMemcpy(&slice[n], slice, n*sizeof(int), cudaMemcpyDeviceToDevice);
-		global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-		global_next_by_row <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+		cudaMemcpy(&islice[n], islice, n*sizeof(int), cudaMemcpyDeviceToDevice);
+		global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+		global_next_by_row <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 	}
-	cudaMemcpy(value, slice, sizeof(int), cudaMemcpyDeviceToHost);
-	if (value[0] == 0) {
+	cudaMemcpy(ivalue, islice, sizeof(int), cudaMemcpyDeviceToHost);
+	if (ivalue[0] == 0) {
 		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
 		goto the_end;
 	}
 
 	printf(" Check Graph by columns \n");
 	/* Проверяем граф на связанность по столбцам */
-	global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-	cudaMemcpy(slice, &value[1], sizeof(int), cudaMemcpyHostToDevice);
+	global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+	cudaMemcpy(islice, &ivalue[1], sizeof(int), cudaMemcpyHostToDevice);
 	for (int i = 1; i <= n; i++) {
-		cudaMemcpy(&slice[n], slice, n*sizeof(int), cudaMemcpyDeviceToDevice);
-		global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-		global_prev_by_col <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+		cudaMemcpy(&islice[n], islice, n*sizeof(int), cudaMemcpyDeviceToDevice);
+		global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+		global_prev_by_col <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 	}
-	cudaMemcpy(value, slice, sizeof(int), cudaMemcpyDeviceToHost);
-	if (value[0] == 0) {
+	cudaMemcpy(ivalue, islice, sizeof(int), cudaMemcpyDeviceToHost);
+	if (ivalue[0] == 0) {
 		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
 		goto the_end;
 	}
 	printf(" Check Graph by rows \n");
 	/* Проверяем граф на связанность по строкам */
-	global_slice_clear << < blocks, threads >> >(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-	cudaMemcpy(slice, &value[1], sizeof(int), cudaMemcpyHostToDevice);
+	global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+	cudaMemcpy(islice, &ivalue[1], sizeof(int), cudaMemcpyHostToDevice);
 	for (int i = 1; i <= n; i++)
 	{
-		cudaMemcpy(&slice[n], slice, n*sizeof(int), cudaMemcpyDeviceToDevice);
-		global_next_by_row <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+		cudaMemcpy(&islice[n], islice, n*sizeof(int), cudaMemcpyDeviceToDevice);
+		global_next_by_row <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 	}
-	global_min_by_dim << < 1, 1 >> >(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-	cudaMemcpy(value, m, sizeof(int), cudaMemcpyDeviceToHost);
-	if (value[0] == 0) {
+	global_min_by_dim <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+	cudaMemcpy(ivalue, im, sizeof(int), cudaMemcpyDeviceToHost);
+	if (ivalue[0] == 0) {
 		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
 		goto the_end;
 	}
 
 	printf(" Check Graph by columns \n");
 	/* Проверяем граф на связанность по столбцам */
-	global_slice_clear << < blocks, threads >> >(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-	cudaMemcpy(slice, &value[1], sizeof(int), cudaMemcpyHostToDevice);
+	global_slice_clear <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+	cudaMemcpy(islice, &ivalue[1], sizeof(int), cudaMemcpyHostToDevice);
 	for (int i = 1; i <= n; i++) {
-		cudaMemcpy(&slice[n], slice, n*sizeof(int), cudaMemcpyDeviceToDevice);
-		global_prev_by_col <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+		cudaMemcpy(&islice[n], islice, n*sizeof(int), cudaMemcpyDeviceToDevice);
+		global_prev_by_col <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 	}
-	global_min_by_dim << < 1, 1 >> >(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-	cudaMemcpy(value, m, sizeof(int), cudaMemcpyDeviceToHost);
-	if (value[0] == 0) {
+	global_min_by_dim <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+	cudaMemcpy(ivalue, im, sizeof(int), cudaMemcpyDeviceToHost);
+	if (ivalue[0] == 0) {
 		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
 		goto the_end;
 	}
@@ -417,10 +432,10 @@ __host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice,
 
 		
 		printf("Matrix rank :\t%d\n", n);
-		cudaMemcpy(buffer, matrix[n], n*n*sizeof(int), cudaMemcpyDeviceToHost);
+		cudaMemcpy(lbuffer, matrix[n], n*n*sizeof(long), cudaMemcpyDeviceToHost);
 		for (int i = 0; i < n; i++){
 			for (int j = 0; j < n; j++){
-				printf("%d%s", buffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
+				printf("%ld%s", lbuffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
 			}
 		}
 
@@ -430,16 +445,16 @@ __host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice,
 		int blocks2 = min(max(1, (int)pow((double)n, 0.66666666666666)), 15);
 		int threads2 = min(max(1, (int)pow((double)n, 0.66666666666666)), 15);
 
-		global_sum_lbound_begin <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+		global_sum_lbound_begin <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
 		printf(" global_add_forbidden \n");
 		/* Запрещаем обратные переходы */
-		global_add_forbidden <<< blocks, threads >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+		global_add_forbidden <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
-		cudaMemcpy(buffer, matrix[n], n*n*sizeof(int), cudaMemcpyDeviceToHost);
+		cudaMemcpy(lbuffer, matrix[n], n*n*sizeof(long), cudaMemcpyDeviceToHost);
 		for (int i = 0; i < n; i++){
 			for (int j = 0; j < n; j++){
-				printf("%d%s", buffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
+				printf("%ld%s", lbuffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
 			}
 		}
 
@@ -448,98 +463,98 @@ __host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice,
 
 			printf(" global_min_by_row \n");
 			/* Находим минимальные значения в строках матрицы параллельно в процессах */
-			global_min_by_row <<< blocks1, threads1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-			global_check_infinity <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-			cudaMemcpy(value, m, sizeof(int), cudaMemcpyDeviceToHost);
-			if (value[0] == 0) {
+			global_min_by_row <<< blocks1, threads1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+			global_check_infinity <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+			cudaMemcpy(ivalue, im, sizeof(int), cudaMemcpyDeviceToHost);
+			if (ivalue[0] == 0) {
 
 				printf(" global_sub_by_row \n");
 				/* Вычитаем минимальные значения из строк параллельно в процессах */
-				global_sub_by_row <<< blocks2, threads2 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+				global_sub_by_row <<< blocks2, threads2 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
-				cudaMemcpy(buffer, matrix[n], n*n*sizeof(int), cudaMemcpyDeviceToHost);
+				cudaMemcpy(lbuffer, matrix[n], n*n*sizeof(long), cudaMemcpyDeviceToHost);
 				for (int i = 0; i < n; i++){
 					for (int j = 0; j < n; j++){
-						printf("%d%s", buffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
+						printf("%ld%s", lbuffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
 					}
 				}
 
 				printf(" global_sum_lbound_step \n");
-				global_sum_lbound_step <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+				global_sum_lbound_step <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 			}
 
 			printf(" global_min_by_col \n");
 			/* Находим минимальные значения в столбцах матрицы параллельно в процессах */
-			global_min_by_col <<< blocks1, threads1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-			global_check_infinity <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-			cudaMemcpy(value, m, sizeof(int), cudaMemcpyDeviceToHost);
-			if (value[0] == 0) {
+			global_min_by_col <<< blocks1, threads1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+			global_check_infinity <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+			cudaMemcpy(ivalue, im, sizeof(int), cudaMemcpyDeviceToHost);
+			if (ivalue[0] == 0) {
 
 				printf(" global_sub_by_col \n");
 				/* Вычитаем минимальные значения из столбцов параллельно в процессах */
-				global_sub_by_col <<< blocks2, threads2 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+				global_sub_by_col <<< blocks2, threads2 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
-				cudaMemcpy(buffer, matrix[n], n*n*sizeof(int), cudaMemcpyDeviceToHost);
+				cudaMemcpy(lbuffer, matrix[n], n*n*sizeof(long), cudaMemcpyDeviceToHost);
 				for (int i = 0; i < n; i++){
 					for (int j = 0; j < n; j++){
-						printf("%d%s", buffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
+						printf("%ld%s", lbuffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
 					}
 				}
 
 				printf(" global_sum_lbound_step \n");
-				global_sum_lbound_step <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+				global_sum_lbound_step <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 			}
 
 			printf(" global_sum_lbound_end \n");
-			global_sum_lbound_end <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+			global_sum_lbound_end <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
-			cudaMemcpy(buffer, &lbound[n], sizeof(int), cudaMemcpyDeviceToHost);
-			printf("%d\n", buffer[0]);
+			cudaMemcpy(lbuffer, &lbound[n], sizeof(long), cudaMemcpyDeviceToHost);
+			printf("%ld\n", lbuffer[0]);
 
 			printf(" global_queue_oneway \n");
 			/* Находим все индексы максимального коэффициента параллельно в процессах */
-			global_queue_oneway_a <<< blocks1, threads1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-			global_queue_oneway_b <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+			global_queue_oneway_a <<< blocks1, threads1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+			global_queue_oneway_b <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
-			cudaMemcpy(value, &qsize[n], 2 * sizeof(int), cudaMemcpyDeviceToHost);
-			if (value[1] > value[0]) cudaMemcpy(buffer, &queue[value[0]], (value[1] - value[0])*sizeof(int), cudaMemcpyDeviceToHost);
-			for (int i = 0; i < (value[1] - value[0]); i++) printf("%d%s", buffer[i], (i == (value[1] - value[0]) - 1) ? "\n" : "\t");
+			cudaMemcpy(ivalue, &qsize[n], 2 * sizeof(int), cudaMemcpyDeviceToHost);
+			if (ivalue[1] > ivalue[0]) cudaMemcpy(ibuffer, &queue[ivalue[0]], (ivalue[1] - ivalue[0])*sizeof(int), cudaMemcpyDeviceToHost);
+			for (int i = 0; i < (ivalue[1] - ivalue[0]); i++) printf("%d%s", ibuffer[i], (i == (ivalue[1] - ivalue[0]) - 1) ? "\n" : "\t");
 
-			cudaMemcpy(value, &qsize[n], 2 * sizeof(int), cudaMemcpyDeviceToHost);
-			if (value[0] == value[1]) {
+			cudaMemcpy(ivalue, &qsize[n], 2 * sizeof(int), cudaMemcpyDeviceToHost);
+			if (ivalue[0] == ivalue[1]) {
 				printf(" global_calc_gamma \n");
 				/* Расчитываем коэффициенты параллельно в процессах */
-				global_calc_gamma <<< blocks2, threads2 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+				global_calc_gamma <<< blocks2, threads2 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
-				cudaMemcpy(buffer, gamma, n*n*sizeof(int), cudaMemcpyDeviceToHost);
+				cudaMemcpy(lbuffer, gamma, n*n*sizeof(long), cudaMemcpyDeviceToHost);
 				for (int i = 0; i < n; i++){
 					for (int j = 0; j < n; j++){
-						printf("%d%s", buffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
+						printf("%ld%s", lbuffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
 					}
 				}
 
 				/* Находим максимальный индекс максимального коэффициента параллельно в процессах */
-				global_gamma_max_index_of_max_a <<< blocks1, threads1 >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
-				global_gamma_max_index_of_max_b <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+				global_gamma_max_index_of_max_a <<< blocks1, threads1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+				global_gamma_max_index_of_max_b <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
-				cudaMemcpy(value, m, 2 * sizeof(int), cudaMemcpyDeviceToHost);
-				if (value[1] != INT_MIN)
+				cudaMemcpy(lvalue, lm, 2 * sizeof(long), cudaMemcpyDeviceToHost);
+				if (lvalue[1] != LONG_MIN)
 				{
 					printf(" global_queue_indexes_of_max \n");
 					/* Находим все индексы максимального коэффициента параллельно в процессах */
-					global_queue_indexes_of_max <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+					global_queue_indexes_of_max <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
-					cudaMemcpy(value, &qsize[n], 2 * sizeof(int), cudaMemcpyDeviceToHost);
-					if (value[1] > value[0]) cudaMemcpy(buffer, &queue[value[0]], (value[1] - value[0])*sizeof(int), cudaMemcpyDeviceToHost);
-					for (int i = 0; i < (value[1] - value[0]); i++) printf("%d%s", buffer[i], (i == (value[1] - value[0]) - 1) ? "\n" : "\t");
+					cudaMemcpy(ivalue, &qsize[n], 2 * sizeof(int), cudaMemcpyDeviceToHost);
+					if (ivalue[1] > ivalue[0]) cudaMemcpy(ibuffer, &queue[ivalue[0]], (ivalue[1] - ivalue[0])*sizeof(int), cudaMemcpyDeviceToHost);
+					for (int i = 0; i < (ivalue[1] - ivalue[0]); i++) printf("%d%s", ibuffer[i], (i == (ivalue[1] - ivalue[0]) - 1) ? "\n" : "\t");
 
 				}
 			}
 			else {
-				value[0] = value[1] - 1;
-				cudaMemcpy(&qsize[n], value, sizeof(int), cudaMemcpyHostToDevice);
+				ivalue[0] = ivalue[1] - 1;
+				cudaMemcpy(&qsize[n], ivalue, sizeof(int), cudaMemcpyHostToDevice);
 				printf(" global_add_lbound \n");
-				global_add_lbound <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+				global_add_lbound <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 			}
 
 			/* Теперь все индексы должны быть рекурсивно обработаны */
@@ -547,24 +562,24 @@ __host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice,
 		}
 		else {
 
-			cudaMemcpy(value, matrix[n], sizeof(int), cudaMemcpyDeviceToHost);
-			if (value[0] != INT_MAX){
+			cudaMemcpy(lvalue, matrix[n], sizeof(long), cudaMemcpyDeviceToHost);
+			if (lvalue[0] != LONG_MAX){
 				cudaMemcpy(from, rows[n], n*sizeof(int), cudaMemcpyDeviceToDevice);
 				cudaMemcpy(to, cols[n], n*sizeof(int), cudaMemcpyDeviceToDevice);
 
 				printf(" global_sum_lbound \n");
 				/* Суммируем Текущую Нижнюю Границу параллельно в процессах */
-				global_sum_lbound <<< 1, 1 >>>(queue, qsize, lbound, gamma, slice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+				global_sum_lbound <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
 
 				/* Сравниваем текущую стоимость с ранее найденой лучшей стоимостью */
-				cudaMemcpy(value, m, sizeof(int), cudaMemcpyDeviceToHost);
-				if (value[0] < bestPrice[0]){
-					bestPrice[0] = value[0];
+				cudaMemcpy(lvalue, lm, sizeof(long), cudaMemcpyDeviceToHost);
+				if (lvalue[0] < bestPrice[0]){
+					bestPrice[0] = lvalue[0];
 					cudaMemcpy(bestFrom, from, rank * sizeof(int), cudaMemcpyDeviceToHost);
 					cudaMemcpy(bestTo, to, rank * sizeof(int), cudaMemcpyDeviceToHost);
 				}
-				printf("Current Price\t: %d\n", bestPrice[0]);
+				printf("Current Price\t: %ld\n", bestPrice[0]);
 			}
 			n++;
 		}
@@ -572,8 +587,8 @@ __host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice,
 		/* Возврат из "рекурсивного" вызова */
 		/* Чтобы не делать рекурсивные обходы работаем только с объявленным стеком */
 		while ((n <= rank)) {
-			cudaMemcpy(value, &qsize[n], 2 * sizeof(int), cudaMemcpyDeviceToHost);
-			if (value[0] == value[1]) {
+			cudaMemcpy(ivalue, &qsize[n], 2 * sizeof(int), cudaMemcpyDeviceToHost);
+			if (ivalue[0] == ivalue[1]) {
 
 				printf(" Return from Recursion \n");
 				n++;
@@ -584,28 +599,28 @@ __host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice,
 		if (n > rank) break;
 
 		/* Перебираем значения из очереди */
-		cudaMemcpy(value, &qsize[n], sizeof(int), cudaMemcpyDeviceToHost);
-		cudaMemcpy(&value[1], &queue[value[0]], sizeof(int), cudaMemcpyDeviceToHost);
-		value[0]++;
-		cudaMemcpy(&qsize[n], value, sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(ivalue, &qsize[n], sizeof(int), cudaMemcpyDeviceToHost);
+		cudaMemcpy(&ivalue[1], &queue[ivalue[0]], sizeof(int), cudaMemcpyDeviceToHost);
+		ivalue[0]++;
+		cudaMemcpy(&qsize[n], ivalue, sizeof(int), cudaMemcpyHostToDevice);
 
-		int id = value[1];
-		value[0] = id / n; /* Номер строки */
-		value[1] = id % n; /* Номер столбца */
+		int id = ivalue[1];
+		ivalue[0] = id / n; /* Номер строки */
+		ivalue[1] = id % n; /* Номер столбца */
 
-		cudaMemcpy(m, value, 2 * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(im, ivalue, 2 * sizeof(int), cudaMemcpyHostToDevice);
 
-		cudaMemcpy(&from[n - 1], &rows[n][value[0]], sizeof(int), cudaMemcpyDeviceToDevice);
-		cudaMemcpy(&to[n - 1], &cols[n][value[1]], sizeof(int), cudaMemcpyDeviceToDevice);
+		cudaMemcpy(&from[n - 1], &rows[n][ivalue[0]], sizeof(int), cudaMemcpyDeviceToDevice);
+		cudaMemcpy(&to[n - 1], &cols[n][ivalue[1]], sizeof(int), cudaMemcpyDeviceToDevice);
 
 		printf(" global_matrix_trunc \n");
 		/* Удаляем строку и столбец */
-		if (value[0] > 0) cudaMemcpy(rows[n - 1], rows[n], value[0] * sizeof(int), cudaMemcpyDeviceToDevice);
-		if (value[0] < (n - 1)) cudaMemcpy(&rows[n - 1][value[0]], &rows[n][value[0] + 1], (n - value[0] - 1) * sizeof(int), cudaMemcpyDeviceToDevice);
-		if (value[1] > 0) cudaMemcpy(cols[n - 1], cols[n], value[1] * sizeof(int), cudaMemcpyDeviceToDevice);
-		if (value[1] < (n - 1)) cudaMemcpy(&cols[n - 1][value[1]], &cols[n][value[1] + 1], (n - value[1] - 1) * sizeof(int), cudaMemcpyDeviceToDevice);
+		if (ivalue[0] > 0) cudaMemcpy(rows[n - 1], rows[n], ivalue[0] * sizeof(int), cudaMemcpyDeviceToDevice);
+		if (ivalue[0] < (n - 1)) cudaMemcpy(&rows[n - 1][ivalue[0]], &rows[n][ivalue[0] + 1], (n - ivalue[0] - 1) * sizeof(int), cudaMemcpyDeviceToDevice);
+		if (ivalue[1] > 0) cudaMemcpy(cols[n - 1], cols[n], ivalue[1] * sizeof(int), cudaMemcpyDeviceToDevice);
+		if (ivalue[1] < (n - 1)) cudaMemcpy(&cols[n - 1][ivalue[1]], &cols[n][ivalue[1] + 1], (n - ivalue[1] - 1) * sizeof(int), cudaMemcpyDeviceToDevice);
 
-		global_matrix_trunc <<< blocks2, threads2 >>>(queue, qsize, lbound, gamma, slice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, m, n, rank);
+		global_matrix_trunc <<< blocks2, threads2 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
 		n--;
 	}
@@ -614,7 +629,8 @@ __host__ void host_little(int *data, int *bestFrom, int *bestTo, int *bestPrice,
 the_end:
 	/* Освобождаем ранее выделенные ресурсы */
 
-	free(buffer);
+	free(ibuffer);
+	free(lbuffer);
 	for (int i = 1; i <= n; i++) cudaFree(matrix[i]);
 	for (int i = 1; i <= n; i++) cudaFree(rows[i]);
 	for (int i = 1; i <= n; i++) cudaFree(cols[i]);
@@ -627,8 +643,10 @@ the_end:
 	cudaFree(qsize);
 	cudaFree(from);
 	cudaFree(to);
-	cudaFree(slice);
-	cudaFree(m);
+	cudaFree(islice);
+	cudaFree(lslice);
+	cudaFree(im);
+	cudaFree(lm);
 
 	err = err;
 }
@@ -649,9 +667,9 @@ int main(int argc, char* argv[])
 	char *tok;
 	char *p;
 	int n;         /* Ранг текущего массива */
-	int *matrix;  /* Стек массивов элементов */
+	long *matrix;  /* Стек массивов элементов */
 	int i, j;
-	int bestPrice;
+	long bestPrice;
 	int *bestFrom; /* Стек дуг (индексов) в порядке их удаления из матрицы */
 	int *bestTo;   /* Стек дуг (индексов) в порядке их удаления из матрицы */
 
@@ -682,7 +700,7 @@ int main(int argc, char* argv[])
 	}
 	n = max(n, i);
 
-	matrix = (int *)malloc(n*n*sizeof(int));
+	matrix = (long *)malloc(n*n*sizeof(long));
 	bestFrom = (int *)malloc((n + 1)*sizeof(int));
 	bestTo = (int *)malloc((n + 1)*sizeof(int));
 
@@ -694,27 +712,27 @@ int main(int argc, char* argv[])
 		for (tok = mystrtok(&p, tok, ';'); tok != NULL; tok = mystrtok(&p, NULL, ';'))
 		{
 			/* Пустые элементы - это запрещённые пути */
-			matrix[n*i + j++] = strempty(tok) ? INT_MAX : atoi(tok);
+			matrix[n*i + j++] = strempty(tok) ? LONG_MAX : atol(tok);
 		}
-		for (; j < n; j++) matrix[n*i + j] = INT_MAX;
+		for (; j < n; j++) matrix[n*i + j] = LONG_MAX;
 	}
-	for (j = 0; j < (n - i)*n; j++) matrix[n*i + j] = INT_MAX;
-	for (i = 0; i < n; i++) matrix[n*i + i] = INT_MAX; /* Запрещаем петли */
+	for (j = 0; j < (n - i)*n; j++) matrix[n*i + j] = LONG_MAX;
+	for (i = 0; i < n; i++) matrix[n*i + i] = LONG_MAX; /* Запрещаем петли */
 
 	fclose(fs);
 
 	printf("Matrix rank :\t%d\n", n);
 	for (i = 0; i < n; i++){
 		for (j = 0; j < n; j++){
-			printf("%d%s", matrix[i*n + j], ((j == n - 1) ? "\n" : "\t"));
+			printf("%ld%s", matrix[i*n + j], ((j == n - 1) ? "\n" : "\t"));
 		}
 	}
 	fflush(stdout);
 
 	// Find/set the device.
-	int device_qsize = 0;
-	cudaGetDeviceCount(&device_qsize);
-	for (i = 0; i < device_qsize; ++i)
+	int device_size = 0;
+	cudaGetDeviceCount(&device_size);
+	for (i = 0; i < device_size; ++i)
 	{
 		cudaDeviceProp properties;
 		cudaGetDeviceProperties(&properties, i);
@@ -726,9 +744,9 @@ int main(int argc, char* argv[])
 	cudaDeviceReset();
 
 	/* Bыводим результаты */
-	if (bestPrice != INT_MAX){
+	if (bestPrice != LONG_MAX){
 		printf("Best Path\t: "); for (int i = 0; i < n; i++) printf("(%d,%d)%s", bestFrom[i], bestTo[i], ((i < (n - 1)) ? "," : "\n"));
-		printf("Best Price\t: %d\n", bestPrice);
+		printf("Best Price\t: %ld\n", bestPrice);
 
 		fs = fopen(outputFileName, "w");
 		if (fs == NULL) {
@@ -746,6 +764,6 @@ int main(int argc, char* argv[])
 
 	fflush(stdout);
 
-	if (bestPrice == INT_MAX) exit(-1);
+	if (bestPrice == LONG_MAX) exit(-1);
 	exit(0);
 }

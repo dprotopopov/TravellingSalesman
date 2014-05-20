@@ -19,7 +19,9 @@
     <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="little.cu" />
     <None Include="1.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="little.cu" />
   </ItemGroup>
 </Project>

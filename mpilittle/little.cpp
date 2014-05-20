@@ -79,332 +79,354 @@ char *mystrtok(char **m, char *s, char c)
 
 #define DATA_TAG 1
 
-void _mpi_queue_oneway(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_queue_oneway(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	int id; for (id = myrank*2*n / nrank; id < (int)((myrank + 1)*2*n / nrank); id++) {
 		if (id < n){
-			m[0] = 0;
-			int i; for (i = 0; m[0] < 2 && i < n; i++)
-				if (matrix[n][i*n + id] != INT_MAX) {
-					m[0]++; m[1] = i*n + id;
+			im[0] = 0;
+			int i; for (i = 0; im[0] < 2 && i < n; i++)
+				if (matrix[n][i*n + id] != LONG_MAX) {
+					im[0]++; im[1] = i*n + id;
 				}
-			if (m[0] == 1) queue[--qsize[n]] = m[1];
+			if (im[0] == 1) queue[--qsize[n]] = im[1];
 		}
 		else {
-			m[0] = 0;
-			int j; for (j = 0; m[0] < 2 && j < n; j++)
-				if (matrix[n][(id-n)*n + j] != INT_MAX) {
-					m[0]++; m[1] = (id - n)*n + j;
+			im[0] = 0;
+			int j; for (j = 0; im[0] < 2 && j < n; j++)
+				if (matrix[n][(id-n)*n + j] != LONG_MAX) {
+					im[0]++; im[1] = (id - n)*n + j;
 				}
-			if (m[0] == 1) queue[--qsize[n]] = m[1];
+			if (im[0] == 1) queue[--qsize[n]] = im[1];
 		}
 	}
 }
-void _mpi_add_forbidden(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_add_forbidden(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	int id; for (id = n; id < rank; id++) {
 		int i; for (i = n; i-- > 0;) if (rows[n][i] == to[id]) break; /* Номер строки */
 		int j; for (j = n; j-- > 0;) if (cols[n][j] == from[id]) break; /* Номер столбца */
-		if (i != -1 && j != -1) matrix[n][i*n + j] = INT_MAX;
+		if (i != -1 && j != -1) matrix[n][i*n + j] = LONG_MAX;
 	}
 }
-void _mpi_rowscols_trunc(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_rowscols_trunc(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Удаляем строку и столбец в процессах */
-	memmove(rows[n - 1], rows[n], m[0] * sizeof(int));
-	memmove(&rows[n - 1][m[0]], &rows[n][m[0] + 1], (n - m[0] - 1) * sizeof(int));
-	memmove(cols[n - 1], cols[n], m[1] * sizeof(int));
-	memmove(&cols[n - 1][m[1]], &cols[n][m[1] + 1], (n - m[1] - 1) * sizeof(int));
+	memmove(rows[n - 1], rows[n], im[0] * sizeof(int));
+	memmove(&rows[n - 1][im[0]], &rows[n][im[0] + 1], (n - im[0] - 1) * sizeof(int));
+	memmove(cols[n - 1], cols[n], im[1] * sizeof(int));
+	memmove(&cols[n - 1][im[1]], &cols[n][im[1] + 1], (n - im[1] - 1) * sizeof(int));
 }
-void _mpi_matrix_trunc(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_matrix_trunc(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Удаляем строку и столбец параллельно в процессах */
 	int id; for (id = myrank*(n - 1)*(n - 1) / nrank; id < ((myrank + 1)*(n - 1)*(n - 1) / nrank); id++) {
 		int i = id / (n - 1); /* Номер строки */
 		int j = id % (n - 1); /* Номер столбца */
-		if (i < m[0] && j < m[1]) matrix[n - 1][id] = matrix[n][(i + 0)*n + j + 0];
-		else if (i >= m[0] && j < m[1]) matrix[n - 1][id] = matrix[n][(i + 1)*n + j + 0];
-		else if (i < m[0] && j >= m[1]) matrix[n - 1][id] = matrix[n][(i + 0)*n + j + 1];
-		else if (i >= m[0] && j >= m[1]) matrix[n - 1][id] = matrix[n][(i + 1)*n + j + 1];
+		if (i < im[0] && j < im[1]) matrix[n - 1][id] = matrix[n][(i + 0)*n + j + 0];
+		else if (i >= im[0] && j < im[1]) matrix[n - 1][id] = matrix[n][(i + 1)*n + j + 0];
+		else if (i < im[0] && j >= im[1]) matrix[n - 1][id] = matrix[n][(i + 0)*n + j + 1];
+		else if (i >= im[0] && j >= im[1]) matrix[n - 1][id] = matrix[n][(i + 1)*n + j + 1];
 	}
 }
-void _mpi_queue_indexes_of_max(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_queue_indexes_of_max(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Находим все индексы максимального коэффициента параллельно в процессах */
 	/* Каждый процесс обрабатывает подмножество матрицы из m / nrank элементов */
 	/* Список сохраняется в стеке индексов */
-	int id; for (id = (myrank*(m[0] + 1) / nrank); id < ((myrank + 1)*(m[0] + 1) / nrank); id++) {
-		if (m[1] == gamma[id]) queue[--qsize[n]] = id;
+	int id; for (id = (myrank*(im[0] + 1) / nrank); id < ((myrank + 1)*(im[0] + 1) / nrank); id++) {
+		if (lm[1] == gamma[id]) queue[--qsize[n]] = id;
 	}
 }
-void _mpi_join_queue(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_join_queue(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Собираем последовательным опросом дочерних процессов все индексы максимального коэффициента в хост-процессе */
 	/* Список сохраняется в стеке индексов */
 	if (myrank == 0) {
 		int i; for (i = 1; i < nrank; i++) {
-			MPI_Recv(&m[1], 1, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
-			qsize[n] = qsize[n] - m[1];
-			if (m[1] > 0) MPI_Recv(&queue[qsize[n]], m[1], MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
+			MPI_Recv(&im[1], 1, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
+			qsize[n] = qsize[n] - im[1];
+			if (im[1] > 0) MPI_Recv(&queue[qsize[n]], im[1], MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
 		}
 	}
 	else {
-		m[1] = qsize[n + 1] - qsize[n];
-		MPI_Send(&m[1], 1, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
-		if (m[1] > 0) MPI_Send(&queue[qsize[n]], m[1], MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		im[1] = qsize[n + 1] - qsize[n];
+		MPI_Send(&im[1], 1, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		if (im[1] > 0) MPI_Send(&queue[qsize[n]], im[1], MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
 	}
 
 	/* Копируем брэдкастом все индексы максимального коэффициента в дочерние процессы */
 	MPI_Bcast(&qsize[n], 1, MPI_INT, 0, MPI_COMM_WORLD);
 	if (qsize[n + 1] > qsize[n]) MPI_Bcast(&queue[qsize[n]], (qsize[n + 1] - qsize[n]), MPI_INT, 0, MPI_COMM_WORLD);
 }
-void _mpi_gamma_max_index_of_max(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_gamma_max_index_of_max(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Находим максимальный индекс максимального коэффициента параллельно в процессах */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
-	m[0] = (int)(myrank*n*n / nrank); m[1] = gamma[m[0]];
-	int id; for (id = m[0] + 1; id < ((myrank + 1)*n*n / nrank); id++) {
-		if (m[1] <= gamma[id]) {
-			m[0] = id; m[1] = gamma[m[0]];
+	im[0] = (int)(myrank*n*n / nrank); 
+	lm[1] = gamma[im[0]];
+	int id; for (id = im[0] + 1; id < ((myrank + 1)*n*n / nrank); id++) {
+		if (lm[1] <= gamma[id]) {
+			im[0] = id; 
+			lm[1] = gamma[im[0]];
 		}
 	}
 
 	/* Собираем последовательным опросом дочерних процессов максимальный индекс максимального коэффициента в хост-процессе */
 	if (myrank == 0) {
 		int i; for (i = 1; i < nrank; i++) {
-			MPI_Recv(&m[1], 1, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
-			if ((gamma[m[0]] < gamma[m[1]]) || ((gamma[m[0]] == gamma[m[1]]) && (m[0] < m[1]))) m[0] = m[1];
+			MPI_Recv(&im[1], 1, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
+			if ((gamma[im[0]] < gamma[im[1]]) || ((gamma[im[0]] == gamma[im[1]]) && (im[0] < im[1]))) im[0] = im[1];
 		}
 	}
 	else {
-		MPI_Send(&m[0], 1, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		MPI_Send(&im[0], 1, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
 	}
 
 	/* Копируем брэдкастом максимальный индекс максимального коэффициента в дочерние процессы */
-	MPI_Bcast(&m[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
-	m[1] = gamma[m[0]];
+	MPI_Bcast(&im[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
+	lm[1] = gamma[im[0]];
 }
-void _mpi_calc_gamma(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_calc_gamma(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Расчитываем коэффициенты параллельно в процессах */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 	int id; for (id = ((int)(myrank*n*n / nrank)); id < (int)((myrank + 1)*n*n / nrank); id++) {
 		if (matrix[n][id] == 0) {
 			int i = id / n; /* Номер строки */
 			int j = id % n; /* Номер столбца */
-			int x = matrix[n][i*n + ((j + 1) % n)]; /* Берём следующий элемент в качестве начального */
-			int y = matrix[n][((i + 1) % n)*n + j]; /* Берём следующий элемент в качестве начального */
+			long x = matrix[n][i*n + ((j + 1) % n)]; /* Берём следующий элемент в качестве начального */
+			long y = matrix[n][((i + 1) % n)*n + j]; /* Берём следующий элемент в качестве начального */
 			int k; for (k = 2; k < n; k++){
 				x = min(x, matrix[n][(i*n) + ((j + k) % n)]);
 				y = min(y, matrix[n][((i + k) % n)*n + j]);
 			}
-			if ((x == INT_MAX) && (y == INT_MAX)) gamma[id] = INT_MAX; /* Из города не въехать и не выехать */
-			else if (x == INT_MAX) gamma[id] = y; /* Из города не въехать */
-			else if (y == INT_MAX) gamma[id] = x; /* Из города не выехать */
+			if ((x == LONG_MAX) && (y == LONG_MAX)) gamma[id] = LONG_MAX; /* Из города не въехать и не выехать */
+			else if (x == LONG_MAX) gamma[id] = y; /* Из города не въехать */
+			else if (y == LONG_MAX) gamma[id] = x; /* Из города не выехать */
 			else gamma[id] = x + y;
 		}
-		else gamma[id] = INT_MIN;
+		else gamma[id] = LONG_MIN;
 	}
 }
-void _mpi_sub_by_row(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_sub_by_row(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Находим минимальные значения в строках матрицы параллельно в процессах */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 	int id; for (id = ((int)(myrank*n*n / nrank)); id < ((myrank + 1)*n*n / nrank); id++) {
 		int i = id / n; /* Номер строки */
-		if (matrix[n][id] != INT_MAX) matrix[n][id] = matrix[n][id]-slice[i];
+		if (matrix[n][id] != LONG_MAX) matrix[n][id] = matrix[n][id]-lslice[i];
 	}
 }
-void _mpi_sub_by_col(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_sub_by_col(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Находим минимальные значения в строках матрицы параллельно в процессах */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 	int id; for (id = ((int)(myrank*n*n / nrank)); id < ((myrank + 1)*n*n / nrank); id++) {
 		int j = id % n; /* Номер столбца */
-		if (matrix[n][id] != INT_MAX) matrix[n][id] = matrix[n][id]-slice[j];
+		if (matrix[n][id] != LONG_MAX) matrix[n][id] = matrix[n][id]-lslice[j];
 	}
 }
-void _mpi_join_matrix(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_join_matrix(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Собираем последовательным опросом дочерних процессов уменьшенные значения в хост-процессе */
 	if (myrank == 0) {
 		int i; for (i = 1; i < nrank; i++) {
 			int j = (int)(i*n*n / nrank); /* Начиная с индекса */
 			int k = (int)((i + 1)*n*n / nrank); /* До индекса ( не включтельно ) */
-			if (k > j) MPI_Recv(&matrix[n][j], k - j, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
+			if (k > j) MPI_Recv(&matrix[n][j], k - j, MPI_LONG, i, DATA_TAG, MPI_COMM_WORLD, status);
 		}
 	}
 	else {
 		int j = (int)(myrank*n*n / nrank); /* Начиная с индекса */
 		int k = (int)((myrank + 1)*n*n / nrank); /* До индекса ( не включтельно ) */
-		if (k > j) MPI_Send(&matrix[n][j], k - j, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		if (k > j) MPI_Send(&matrix[n][j], k - j, MPI_LONG, 0, DATA_TAG, MPI_COMM_WORLD);
 	}
 
 	/* Копируем брэдкастом матрицу с уменьшенными значениями в дочерние процессы */
-	MPI_Bcast(matrix[n], n*n, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(matrix[n], n*n, MPI_LONG, 0, MPI_COMM_WORLD);
 }
-void _mpi_join_gamma(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_join_gamma(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Собираем последовательным опросом дочерних процессов уменьшенные значения в хост-процессе */
 	if (myrank == 0) {
 		int i; for (i = 1; i < nrank; i++) {
 			int j = (int)(i*n*n / nrank); /* Начиная с индекса */
 			int k = (int)((i + 1)*n*n / nrank); /* До индекса ( не включтельно ) */
-			if (k > j) MPI_Recv(&gamma[j], k - j, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
+			if (k > j) MPI_Recv(&gamma[j], k - j, MPI_LONG, i, DATA_TAG, MPI_COMM_WORLD, status);
 		}
 	}
 	else {
 		int j = (int)(myrank*n*n / nrank); /* Начиная с индекса */
 		int k = (int)((myrank + 1)*n*n / nrank); /* До индекса ( не включтельно ) */
-		if (k > j) MPI_Send(&gamma[j], k - j, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		if (k > j) MPI_Send(&gamma[j], k - j, MPI_LONG, 0, DATA_TAG, MPI_COMM_WORLD);
 	}
 
 	/* Копируем брэдкастом матрицу с уменьшенными значениями в дочерние процессы */
-	MPI_Bcast(gamma, n*n, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(gamma, n*n, MPI_LONG, 0, MPI_COMM_WORLD);
 }
-void _mpi_join_min_slice(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_join_min_slice(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Собираем последовательным опросом дочерних процессов минимальные значения в хост-процессе */
 	if (myrank == 0) {
 		int i; for (i = 1; i < nrank; i++){
 			int j = ((int)(i*n*n / nrank)) / n; /* Начиная с индекса */
 			int k = ((int)(((i + 1)*n*n + nrank - 1) / nrank) + n - 1) / n; /* До индекса ( не включтельно ) */
-			if (k > j) MPI_Recv(&slice[n + j], k - j, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
-			for (; j < k; j++) slice[j] = min(slice[j], slice[n + j]);
+			if (k > j) {
+				MPI_Recv(&lslice[n + j], k - j, MPI_LONG, i, DATA_TAG, MPI_COMM_WORLD, status);
+				MPI_Recv(&islice[n + j], k - j, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
+			}
+			for (; j < k; j++) {
+				lslice[j] = min(lslice[j], lslice[n + j]);
+				islice[j] = min(islice[j], islice[n + j]);
+			}
 		}
 	}
 	else {
 		int j = ((int)(myrank*n*n / nrank)) / n; /* Начиная с индекса */
 		int k = ((int)(((myrank + 1)*n*n + nrank - 1) / nrank) + n - 1) / n; /* До индекса ( не включтельно ) */
-		if (k > j) MPI_Send(&slice[j], k - j, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		if (k > j) {
+			MPI_Send(&lslice[j], k - j, MPI_LONG, 0, DATA_TAG, MPI_COMM_WORLD);
+			MPI_Send(&islice[j], k - j, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		}
 	}
 
 	/* Копируем брэдкастом минимальные значения в дочерние процессы */
-	MPI_Bcast(slice, n, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(lslice, n, MPI_LONG, 0, MPI_COMM_WORLD);
+	MPI_Bcast(islice, n, MPI_INT, 0, MPI_COMM_WORLD);
 }
-void _mpi_join_max_slice(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_join_max_slice(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Собираем последовательным опросом дочерних процессов минимальные значения в хост-процессе */
 	if (myrank == 0) {
 		int i; for (i = 1; i < nrank; i++){
 			int j = ((int)(i*n*n / nrank)) / n; /* Начиная с индекса */
 			int k = ((int)(((i + 1)*n*n + nrank - 1) / nrank) + n - 1) / n; /* До индекса ( не включтельно ) */
-			if (k > j) MPI_Recv(&slice[n + j], k - j, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
-			for (; j < k; j++) slice[j] = max(slice[j], slice[n + j]);
+			if (k > j) {
+				MPI_Recv(&lslice[n + j], k - j, MPI_LONG, i, DATA_TAG, MPI_COMM_WORLD, status);
+				MPI_Recv(&islice[n + j], k - j, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
+			}
+			for (; j < k; j++) {
+				lslice[j] = max(lslice[j], lslice[n + j]);
+				islice[j] = max(islice[j], islice[n + j]);
+			}
 		}
 	}
 	else {
 		int j = ((int)(myrank*n*n / nrank)) / n; /* Начиная с индекса */
 		int k = ((int)(((myrank + 1)*n*n + nrank - 1) / nrank) + n - 1) / n; /* До индекса ( не включтельно ) */
-		if (k > j) MPI_Send(&slice[j], k - j, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		if (k > j) {
+			MPI_Send(&lslice[j], k - j, MPI_LONG, 0, DATA_TAG, MPI_COMM_WORLD);
+			MPI_Send(&islice[j], k - j, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		}
 	}
 
 	/* Копируем брэдкастом минимальные значения в дочерние процессы */
-	MPI_Bcast(slice, n, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(lslice, n, MPI_LONG, 0, MPI_COMM_WORLD);
+	MPI_Bcast(islice, n, MPI_INT, 0, MPI_COMM_WORLD);
 }
-void _mpi_min_by_col(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_min_by_col(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Находим минимальные значения в колонках матрицы параллельно в процессах */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
-	int j; for (j = 0; j < n; j++) slice[j] = matrix[n][j];
+	int j; for (j = 0; j < n; j++) lslice[j] = matrix[n][j];
 	int id; for (id = (int)(myrank*n*n / nrank); id < (int)((myrank + 1)*n*n / nrank); id++) {
 		int i = id % n; /* Номер строки */
 		int j = id / n; /* Номер столбца */
-		slice[j] = min(slice[j], matrix[n][i*n+j]);
+		lslice[j] = min(lslice[j], matrix[n][i*n+j]);
 	}
 }
-void _mpi_min_by_row(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_min_by_row(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Находим минимальные значения в строках матрицы параллельно в процессах */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
-	int i; for (i = 0; i < n; i++) slice[i] = matrix[n][n*i];
+	int i; for (i = 0; i < n; i++) lslice[i] = matrix[n][n*i];
 	int id; for (id = (int)(myrank*n*n / nrank); id < (int)((myrank + 1)*n*n / nrank); id++) {
 		int i = id / n;
-		slice[i] = min(slice[i], matrix[n][id]);
+		lslice[i] = min(lslice[i], matrix[n][id]);
 	}
 }
-void _mpi_next_by_row(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_next_by_row(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	int id; for (id = (int)(myrank*n*n / nrank); id < (int)((myrank + 1)*n*n / nrank); id++) {
 		int i = id / n; /* Номер строки */
 		int j = id % n; /* Номер столбца */
-		if (matrix[n][id] != INT_MAX){
-			slice[i] = max(slice[i], slice[j + n]);
+		if (matrix[n][id] != LONG_MAX){
+			islice[i] = max(islice[i], islice[j + n]);
 		}
 	}
 }
-void _mpi_prev_by_col(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_prev_by_col(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	int id; for (id = (int)(myrank*n*n / nrank); id < (int)((myrank + 1)*n*n / nrank); id++) {
 		int i = id % n; /* Номер строки */
 		int j = id / n; /* Номер столбца */
-		if (matrix[n][i*n + j] != INT_MAX) slice[j] = max(slice[j], slice[i + n]);
+		if (matrix[n][i*n + j] != LONG_MAX) islice[j] = max(islice[j], islice[i + n]);
 	}
 }
-void _mpi_check_infinity(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
-	m[0] = 0;
-	int id; for (id = (int)(myrank*n / nrank); (m[0] == 0) && (id < (int)((myrank + 1)*n / nrank)); id++) {
-		if (slice[id] == INT_MAX) m[0] = 1;
+void _mpi_check_infinity(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
+	im[0] = 0;
+	int id; for (id = (int)(myrank*n / nrank); (im[0] == 0) && (id < (int)((myrank + 1)*n / nrank)); id++) {
+		if (lslice[id] == LONG_MAX) im[0] = 1;
 	}
 	/* Собираем последовательным опросом дочерних процессов суммы в хост-процессе */
 	if (myrank == 0) {
 		int i; for (i = 1; i < nrank; i++){
-			MPI_Recv(&m[1], 1, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
-			m[0] = max(m[0], m[1]);
+			MPI_Recv(&im[1], 1, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
+			im[0] = max(im[0], im[1]);
 		}
 	}
 	else {
-		MPI_Send(&m[0], 1, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		MPI_Send(&im[0], 1, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
 	}
-	MPI_Bcast(&m[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&im[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
 }
 
-void _mpi_min_by_dim(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
-	m[0] = n;
-	int id; for (id = (int)(myrank*n / nrank); (m[0] != 0) && (id < (int)((myrank + 1)*n / nrank)); id++) {
-		m[0] = min(m[0], slice[id]);
+void _mpi_min_by_dim(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
+	im[0] = n;
+	int id; for (id = (int)(myrank*n / nrank); (im[0] != 0) && (id < (int)((myrank + 1)*n / nrank)); id++) {
+		im[0] = min(im[0], islice[id]);
 	}
 	/* Собираем последовательным опросом дочерних процессов суммы в хост-процессе */
 	if (myrank == 0) {
 		int i; for (i = 1; i < nrank; i++){
-			MPI_Recv(&m[1], 1, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
-			m[0] = min(m[0], m[1]);
+			MPI_Recv(&im[1], 1, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
+			im[0] = min(im[0], im[1]);
 		}
 	}
 	else {
-		MPI_Send(&m[0], 1, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		MPI_Send(&im[0], 1, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
 	}
 }
-void _mpi_sum_lbound(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_sum_lbound(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	
-	m[0] = 0;
+	lm[0] = 0;
 
 	int i; for (i = 1; i < n; i++) lbound[i] = matrix[n][(n - 1)*i];
 
 	int id; for (id = (int)(myrank*rank / nrank); id < (int)((myrank + 1)*rank / nrank); id++) {
-		m[0] += lbound[id+1];
+		lm[0] += lbound[id+1];
 	}
 	/* Собираем последовательным опросом дочерних процессов сумму в хост-процессе */
 	if (myrank == 0) {
 		int i; for (i = 1; i < nrank; i++){
-			MPI_Recv(&m[1], 1, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
-			m[0] += m[1];
+			MPI_Recv(&lm[1], 1, MPI_LONG, i, DATA_TAG, MPI_COMM_WORLD, status);
+			lm[0] += lm[1];
 		}
 	}
 	else {
-		MPI_Send(&m[0], 1, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		MPI_Send(&lm[0], 1, MPI_LONG, 0, DATA_TAG, MPI_COMM_WORLD);
 	}
 	/* Копируем брэдкастом сумму в дочерние процессы */
-	MPI_Bcast(&m[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&lm[0], 1, MPI_LONG, 0, MPI_COMM_WORLD);
 }
-void _mpi_add_lbound(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_add_lbound(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	lbound[n] += matrix[n][queue[qsize[n]]];
 }
-void _mpi_sum_lbound_begin(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_sum_lbound_begin(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	lbound[n] = 0;
 }
-void _mpi_sum_lbound_step(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_sum_lbound_step(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Каждый процесс обрабатывает подмножество из n / nrank элементов */
 	int id; for (id = myrank*n / nrank; id < ((myrank + 1)*n / nrank); id++) {
-		lbound[n] += slice[id];
+		lbound[n] += lslice[id];
 	}
 }
-void _mpi_sum_lbound_end(int *queue, int *qsize, int *lbound, int *gamma, int *slice, int **matrix, int **rows, int **cols, int *from, int *to, int *m, int n, int rank, int myrank, int nrank, MPI_Status *status){
+void _mpi_sum_lbound_end(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Собираем последовательным опросом дочерних процессов Текущую Нижнюю Границу в хост-процессе */
 	if (myrank == 0) {
 		int i; for (i = 1; i < nrank; i++) {
-			MPI_Recv(&m[0], 1, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
-			lbound[n] += m[0];
+			MPI_Recv(&lm[0], 1, MPI_LONG, i, DATA_TAG, MPI_COMM_WORLD, status);
+			lbound[n] += lm[0];
 		}
 	}
 	else {
-		MPI_Send(&lbound[n], 1, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
+		MPI_Send(&lbound[n], 1, MPI_LONG, 0, DATA_TAG, MPI_COMM_WORLD);
 	}
 
 	/* Копируем брэдкастом Текущую Нижнюю Границу в дочерние процессы */
-	MPI_Bcast(&lbound[n], 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&lbound[n], 1, MPI_LONG, 0, MPI_COMM_WORLD);
 }
 
 int main(int argc, char *argv[])
@@ -413,11 +435,11 @@ int main(int argc, char *argv[])
 	int n;         /* Ранг текущего массива */
 	int nrank;     /* Общее количество процессов */
 	int myrank;    /* Номер текущего процесса */ 
-	int **matrix;  /* Стек массивов элементов */
-	int *gamma;    /* Массив коэффициентов */
+	long **matrix;  /* Стек массивов элементов */
+	long *gamma;    /* Массив коэффициентов */
 	int *queue;    /* Стек очередей индексов элементов */
 	int *qsize;    /* Размер очередей индексов элементов */
-	int *lbound;   /* Стек вычисленных нижних границ */
+	long *lbound;   /* Стек вычисленных нижних границ */
 	int **rows;		/* Стек текущих координат строк */
 	int **cols;		/* Стек текущих координат столцов */
 	/* Стеки дуг (индексов) хранятся в порядке их удаления из матрицы */
@@ -427,9 +449,11 @@ int main(int argc, char *argv[])
 	int *to;   /* Стек дуг (индексов) в порядке их удаления из матрицы */
 	int *bestFrom; /* Стек дуг (индексов) в порядке их удаления из матрицы */
 	int *bestTo;   /* Стек дуг (индексов) в порядке их удаления из матрицы */
-	int bestPrice;
-	int *m;
-	int *slice;
+	long bestPrice;
+	int *im;
+	long *lm;
+	int *islice;
+	long *lslice;
 	int i, j, id;
 
 	MPI_Status status; 
@@ -483,8 +507,8 @@ int main(int argc, char *argv[])
 		}
 		n = max(n, i);
 
-		matrix = (int **)malloc((n + 1)*sizeof(int*));
-		for (i = 1; i <= n; i++) matrix[i] = (int *)malloc(i*i*sizeof(int));
+		matrix = (long **)malloc((n + 1)*sizeof(long*));
+		for (i = 1; i <= n; i++) matrix[i] = (long *)malloc(i*i*sizeof(long));
 
 		fseek(fs, 0, SEEK_SET);
 
@@ -494,19 +518,19 @@ int main(int argc, char *argv[])
 			for (tok = mystrtok(&p, tok, ';'); tok != NULL; tok = mystrtok(&p, NULL, ';'))
 			{
 				/* Пустые элементы - это запрещённые пути */
-				matrix[n][n*i + j++] = strempty(tok) ? INT_MAX : atoi(tok);
+				matrix[n][n*i + j++] = strempty(tok) ? LONG_MAX : atol(tok);
 			}
-			for (; j < n; j++) matrix[n][n*i + j] = INT_MAX;
+			for (; j < n; j++) matrix[n][n*i + j] = LONG_MAX;
 		}
-		for (j = 0; j < (n - i)*n; j++) matrix[n][n*i + j] = INT_MAX;
-		for (i = 0; i < n; i++) matrix[n][n*i + i] = INT_MAX; /* Запрещаем петли */
+		for (j = 0; j < (n - i)*n; j++) matrix[n][n*i + j] = LONG_MAX;
+		for (i = 0; i < n; i++) matrix[n][n*i + i] = LONG_MAX; /* Запрещаем петли */
 
 		fclose(fs);
 
 		printf("Matrix rank :\t%d\n", n);
 		for (i = 0; i < n; i++){
 			for (j = 0; j < n; j++){
-				printf("%d%s", matrix[n][i*n+j], ((j == n-1) ? "\n" : "\t"));
+				printf("%ld%s", matrix[n][i*n+j], ((j == n-1) ? "\n" : "\t"));
 			}
 		}
 	}
@@ -516,17 +540,19 @@ int main(int argc, char *argv[])
 	rank = n;
 
 	if (myrank != 0) {
-		matrix = (int **)malloc((n + 1)*sizeof(int*));
-		for (i = 1; i <= n; i++) matrix[i] = (int *)malloc(i*i*sizeof(int));
+		matrix = (long **)malloc((n + 1)*sizeof(long*));
+		for (i = 1; i <= n; i++) matrix[i] = (long *)malloc(i*i*sizeof(long));
 	}
 
 	/* Копируем брэдкастом исходную матрицу в дочерние процессы */
-	MPI_Bcast(matrix[n], n*n, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(matrix[n], n*n, MPI_LONG, 0, MPI_COMM_WORLD);
 
-	m = (int *)malloc(2*sizeof(int));
-	slice = (int *)malloc(2*n*sizeof(int*));
+	im = (int *)malloc(2*sizeof(int));
+	lm = (long *)malloc(2*sizeof(long));
+	islice = (int *)malloc(2*n*sizeof(int*));
+	lslice = (long *)malloc(2*n*sizeof(long*));
 
-	lbound = (int *)malloc((n + 1)*sizeof(int));
+	lbound = (long *)malloc((n + 1)*sizeof(long));
 	rows = (int **)malloc((n + 1)*sizeof(int*));
 	cols = (int **)malloc((n + 1)*sizeof(int*));
 	for (i = 1; i <= n; i++) rows[i] = (int *)malloc(i*sizeof(int));
@@ -541,27 +567,27 @@ int main(int argc, char *argv[])
 	bestFrom = (int *)malloc(n*sizeof(int));
 	bestTo = (int *)malloc(n*sizeof(int));
 
-	bestPrice = INT_MAX;
+	bestPrice = LONG_MAX;
 
 	queue = (int *)malloc(n*n*n * sizeof(int));
 	qsize = (int *)malloc((n + 2)*sizeof(int));
 	qsize[n + 1] = n*n*n;
 	qsize[n] = qsize[n + 1];
 
-	gamma = (int *)malloc(n*n*sizeof(int));
+	gamma = (long *)malloc(n*n*sizeof(long));
 
 	if (myrank == 0) printf(" Check Graph by rows \n"); fflush(stdout);
 	/* Проверяем граф на существование пути по строкам */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
-	memset(slice, 0, n*sizeof(int));
-	slice[0] = 1;
+	memset(islice, 0, n*sizeof(int));
+	islice[0] = 1;
 	for (i = 1; i <= n; i++){
-		memmove(&slice[n], slice, n*sizeof(int));
-		memset(slice, 0, n*sizeof(int));
-		_mpi_next_by_row(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-		_mpi_join_max_slice(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+		memmove(&islice[n], islice, n*sizeof(int));
+		memset(islice, 0, n*sizeof(int));
+		_mpi_next_by_row(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+		_mpi_join_max_slice(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 	}
-	if (myrank == 0 && slice[0] == 0) {
+	if (myrank == 0 && islice[0] == 0) {
 		fprintf(stderr, "Wrong Graph\n"); fflush(stderr);
 		exit(-1);
 	}
@@ -569,15 +595,15 @@ int main(int argc, char *argv[])
 	if (myrank == 0) printf(" Check Graph by columns \n"); fflush(stdout);
 	/* Проверяем граф на существование пути по столбцам */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
-	memset(slice, 0, n*sizeof(int));
-	slice[0] = 1;
+	memset(islice, 0, n*sizeof(int));
+	islice[0] = 1;
 	for (i = 1; i <= n; i++){
-		memmove(&slice[n], slice, n*sizeof(int));
-		memset(slice, 0, n*sizeof(int));
-		_mpi_prev_by_col(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-		_mpi_join_max_slice(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+		memmove(&islice[n], islice, n*sizeof(int));
+		memset(islice, 0, n*sizeof(int));
+		_mpi_prev_by_col(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+		_mpi_join_max_slice(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 	}
-	if (myrank == 0 && slice[0] == 0) {
+	if (myrank == 0 && islice[0] == 0) {
 		fprintf(stderr, "Wrong Graph\n"); 
 		fflush(stderr);
 		exit(-1);
@@ -589,15 +615,15 @@ int main(int argc, char *argv[])
 	}
 	/* Проверяем граф на связанность по строкам */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
-	memset(slice, 0, n*sizeof(int));
-	slice[0] = 1;
+	memset(islice, 0, n*sizeof(int));
+	islice[0] = 1;
 	for (i = 1; i <= n; i++){
-		memmove(&slice[n], slice, n*sizeof(int));
-		_mpi_next_by_row(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-		_mpi_join_max_slice(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+		memmove(&islice[n], islice, n*sizeof(int));
+		_mpi_next_by_row(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+		_mpi_join_max_slice(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 	}
-	_mpi_min_by_dim(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-	if (myrank == 0 && m[0] == 0) {
+	_mpi_min_by_dim(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+	if (myrank == 0 && im[0] == 0) {
 		fprintf(stderr, "Wrong Graph\n"); 
 		fflush(stderr);
 		exit(-1);
@@ -609,15 +635,15 @@ int main(int argc, char *argv[])
 	}
 	/* Проверяем граф на связанность по столбцам */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
-	memset(slice, 0, n*sizeof(int));
-	slice[0] = 1;
+	memset(islice, 0, n*sizeof(int));
+	islice[0] = 1;
 	for (i = 1; i <= n; i++){
-		memmove(&slice[n], slice, n*sizeof(int));
-		_mpi_prev_by_col(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-		_mpi_join_max_slice(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+		memmove(&islice[n], islice, n*sizeof(int));
+		_mpi_prev_by_col(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+		_mpi_join_max_slice(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 	}
-	_mpi_min_by_dim(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-	if (myrank == 0 && m[0] == 0) {
+	_mpi_min_by_dim(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+	if (myrank == 0 && im[0] == 0) {
 		fprintf(stderr, "Wrong Graph\n"); 
 		fflush(stderr);
 		exit(-1);
@@ -636,25 +662,25 @@ int main(int argc, char *argv[])
 		if (myrank == 0) {
 			for (i = 0; i < n; i++){
 				for (j = 0; j < n; j++){
-					printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+					printf("%ld%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
 				}
 			}
 			fflush(stdout);
 		}
 
-		_mpi_sum_lbound_begin(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+		_mpi_sum_lbound_begin(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 		
 		if (myrank == 0) {
 			printf(" _mpi_add_forbidden \n");
 			fflush(stdout);
 		}
 		/* Запрещаем обратные переходы */
-		_mpi_add_forbidden(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+		_mpi_add_forbidden(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 
 		if (myrank == 0) {
 			for (i = 0; i < n; i++){
 				for (j = 0; j < n; j++){
-					printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+					printf("%ld%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
 				}
 			}
 			fflush(stdout);
@@ -671,10 +697,10 @@ int main(int argc, char *argv[])
 			/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 			/* Собираем последовательным опросом дочерних процессов уменьшенные значения в хост-процессе */
 			/* Копируем брэдкастом минимальные значения в дочерние процессы */
-			_mpi_min_by_row(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-			_mpi_join_min_slice(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-			_mpi_check_infinity(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-			if (m[0] == 0) {
+			_mpi_min_by_row(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+			_mpi_join_min_slice(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+			_mpi_check_infinity(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+			if (im[0] == 0) {
 
 				if (myrank == 0) {
 					printf(" _mpi_sub_by_row \n");
@@ -684,13 +710,13 @@ int main(int argc, char *argv[])
 				/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 				/* Собираем последовательным опросом дочерних процессов уменьшенные значения в хост-процессе */
 				/* Копируем брэдкастом матрицу с уменьшенными значениями в дочерние процессы */
-				_mpi_sub_by_row(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-				_mpi_join_matrix(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+				_mpi_sub_by_row(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+				_mpi_join_matrix(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 
 				if (myrank == 0) {
 					for (i = 0; i < n; i++){
 						for (j = 0; j < n; j++){
-							printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+							printf("%ld%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
 						}
 					}
 					fflush(stdout);
@@ -702,7 +728,7 @@ int main(int argc, char *argv[])
 				}
 				/* Находим сумму минимальных значений в строках матрицы параллельно в процессах */
 				/* Каждый процесс обрабатывает подмножество из n / nrank элементов */
-				_mpi_sum_lbound_step(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+				_mpi_sum_lbound_step(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 			}
 
 			if (myrank == 0) {
@@ -713,10 +739,10 @@ int main(int argc, char *argv[])
 			/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 			/* Собираем последовательным опросом дочерних процессов уменьшенные значения в хост-процессе */
 			/* Копируем брэдкастом минимальные значения в дочерние процессы */
-			_mpi_min_by_col(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-			_mpi_join_min_slice(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-			_mpi_check_infinity(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-			if (m[0] == 0) {
+			_mpi_min_by_col(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+			_mpi_join_min_slice(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+			_mpi_check_infinity(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+			if (im[0] == 0) {
 
 				if (myrank == 0) {
 					printf(" _mpi_sub_by_col \n");
@@ -726,13 +752,13 @@ int main(int argc, char *argv[])
 				/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 				/* Собираем последовательным опросом дочерних процессов уменьшенные значения в хост-процессе */
 				/* Копируем брэдкастом матрицу с уменьшенными значениями в дочерние процессы */
-				_mpi_sub_by_col(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-				_mpi_join_matrix(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+				_mpi_sub_by_col(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+				_mpi_join_matrix(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 
 				if (myrank == 0) {
 					for (i = 0; i < n; i++){
 						for (j = 0; j < n; j++){
-							printf("%d%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+							printf("%ld%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
 						}
 					}
 					fflush(stdout);
@@ -744,7 +770,7 @@ int main(int argc, char *argv[])
 				}
 				/* Находим сумму минимальных значений в столбцах матрицы параллельно в процессах */
 				/* Каждый процесс обрабатывает подмножество из n / nrank элементов */
-				_mpi_sum_lbound_step(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+				_mpi_sum_lbound_step(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 			}
 
 			if (myrank == 0) {
@@ -753,9 +779,9 @@ int main(int argc, char *argv[])
 			}
 			/* Собираем последовательным опросом дочерних процессов Текущую Нижнюю Границу в хост-процессе */
 			/* Копируем брэдкастом Текущую Нижнюю Границу в дочерние процессы */
-			_mpi_sum_lbound_end(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+			_mpi_sum_lbound_end(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 			if (myrank == 0) {
-				printf("%d\n", lbound[n]);
+				printf("%ld\n", lbound[n]);
 				fflush(stdout);
 			}
 
@@ -765,12 +791,12 @@ int main(int argc, char *argv[])
 			}
 			/* Находим все индексы максимального коэффициента параллельно в процессах */
 			/* Каждый процесс обрабатывает подмножество матрицы из n / nrank элементов */
-			_mpi_queue_oneway(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+			_mpi_queue_oneway(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 
 			/* Собираем последовательным опросом дочерних процессов все индексы максимального коэффициента в хост-процессе */
 			/* Список сохраняется в стеке индексов */
 			/* Копируем брэдкастом все индексы максимального коэффициента в дочерние процессы */
-			_mpi_join_queue(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+			_mpi_join_queue(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 
 			if (myrank == 0) {
 				for (i = qsize[n]; i < qsize[n + 1]; i++) printf("%d%s", queue[i], (i == qsize[n + 1] - 1) ? "\n" : "\t");
@@ -786,13 +812,13 @@ int main(int argc, char *argv[])
 				/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 				/* Собираем последовательным опросом дочерних процессов коэффициенты в хост-процессе */
 				/* Копируем брэдкастом коэффициенты в дочерние процессы */
-				_mpi_calc_gamma(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-				_mpi_join_gamma(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+				_mpi_calc_gamma(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+				_mpi_join_gamma(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 
 				if (myrank == 0) {
 					for (i = 0; i < n; i++){
 						for (j = 0; j < n; j++){
-							printf("%d%s", gamma[i*n + j], ((j == n - 1) ? "\n" : "\t"));
+							printf("%ld%s", gamma[i*n + j], ((j == n - 1) ? "\n" : "\t"));
 						}
 					}
 					fflush(stdout);
@@ -802,9 +828,9 @@ int main(int argc, char *argv[])
 				/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
 				/* Собираем последовательным опросом дочерних процессов максимальный индекс максимального коэффициента в хост-процессе */
 				/* Копируем брэдкастом максимальный индекс максимального коэффициента в дочерние процессы */
-				_mpi_gamma_max_index_of_max(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+				_mpi_gamma_max_index_of_max(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 
-				if (m[1] != INT_MIN)
+				if (lm[1] != LONG_MIN)
 				{
 					if (myrank == 0) {
 						printf(" _mpi_queue_indexes_of_max \n");
@@ -815,12 +841,12 @@ int main(int argc, char *argv[])
 					/* Собираем последовательным опросом дочерних процессов все индексы максимального коэффициента в хост-процессе */
 					/* Список сохраняется в стеке индексов */
 					/* Копируем брэдкастом все индексы максимального коэффициента в дочерние процессы */
-					_mpi_queue_indexes_of_max(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+					_mpi_queue_indexes_of_max(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 
 					/* Собираем последовательным опросом дочерних процессов все индексы максимального коэффициента в хост-процессе */
 					/* Список сохраняется в стеке индексов */
 					/* Копируем брэдкастом все индексы максимального коэффициента в дочерние процессы */
-					_mpi_join_queue(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+					_mpi_join_queue(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 
 					if (myrank == 0) for (i = qsize[n]; i < qsize[n + 1]; i++) printf("%d%s", queue[i], (i == qsize[n + 1] - 1) ? "\n" : "\t");
 				}
@@ -831,7 +857,7 @@ int main(int argc, char *argv[])
 					printf(" _mpi_add_lbound \n");
 					fflush(stdout);
 				}
-				_mpi_add_lbound(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+				_mpi_add_lbound(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 			}
 
 			/* Теперь все индексы должны быть рекурсивно обработаны */
@@ -839,7 +865,7 @@ int main(int argc, char *argv[])
 		}
 		else {
 
-			if (matrix[n][0] != INT_MAX) {
+			if (matrix[n][0] != LONG_MAX) {
 				memmove(from, rows[n], n*sizeof(int));
 				memmove(to, cols[n], n*sizeof(int));
 
@@ -851,17 +877,17 @@ int main(int argc, char *argv[])
 				/* Суммируем Текущую Нижнюю Границу параллельно в процессах */
 				/* Каждый процесс обрабатывает подмножество из N / nrank элементов */
 				/* Копируем брэдкастом сумму в дочерние процессы */
-				_mpi_sum_lbound(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
+				_mpi_sum_lbound(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 
 
 				/* Сравниваем текущую стоимость с ранее найденой лучшей стоимостью */
-				if (m[0] < bestPrice){
-					bestPrice = m[0];
+				if (lm[0] < bestPrice){
+					bestPrice = lm[0];
 					memmove(bestFrom, from, rank*sizeof(int));
 					memmove(bestTo, to, rank*sizeof(int));
 				}
 				if (myrank == 0) {
-					printf("Current Price\t: %d\n", bestPrice);
+					printf("Current Price\t: %ld\n", bestPrice);
 					fflush(stdout);
 				}
 			}
@@ -882,19 +908,19 @@ int main(int argc, char *argv[])
 		/* Перебираем значения из очереди */
 		id = queue[qsize[n]++]; 
 
-		m[0] = id / n; /* Номер строки */
-		m[1] = id % n; /* Номер столбца */
+		im[0] = id / n; /* Номер строки */
+		im[1] = id % n; /* Номер столбца */
 
-		from[n - 1] = rows[n][m[0]];
-		to[n - 1] = cols[n][m[1]];
+		from[n - 1] = rows[n][im[0]];
+		to[n - 1] = cols[n][im[1]];
 
 		if (myrank == 0) printf(" _mpi_matrix_trunc \n");
 		/* Удаляем строку и столбец параллельно в процессах */
 		/* Собираем последовательным опросом дочерних процессов усечённый массив в хост-процессе */
 		/* Копируем брэдкастом усечённый массив в дочерние процессы */
-		_mpi_rowscols_trunc(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-		_mpi_matrix_trunc(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n, rank, myrank, nrank, &status);
-		_mpi_join_matrix(queue, qsize, lbound, gamma, slice, matrix, rows, cols, from, to, m, n - 1, rank, myrank, nrank, &status);
+		_mpi_rowscols_trunc(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+		_mpi_matrix_trunc(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+		_mpi_join_matrix(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n - 1, rank, myrank, nrank, &status);
 
 		n--;
 	}
@@ -902,9 +928,9 @@ int main(int argc, char *argv[])
 
 	/* Bыводим результаты */
 
-	if (myrank == 0 && bestPrice != INT_MAX) {
+	if (myrank == 0 && bestPrice != LONG_MAX) {
 		printf("Best Path\t: "); for (i = 0; i < n; i++) printf("(%d,%d)%s", bestFrom[i], bestTo[i], ((i < (n - 1)) ? "," : "\n"));
-		printf("Best Price\t: %d\n", bestPrice);
+		printf("Best Price\t: %ld\n", bestPrice);
 		fflush(stdout);
 
 		FILE *fs = fopen(outputFileName, "w");
@@ -932,11 +958,13 @@ int main(int argc, char *argv[])
 	free(to);
 	free(bestFrom);
 	free(bestTo);
-	free(slice);
-	free(m);
+	free(islice);
+	free(lslice);
+	free(im);
+	free(lm);
 
 	MPI_Finalize(); 
 
-	if (myrank == 0 && bestPrice == INT_MAX) exit(-1);
+	if (myrank == 0 && bestPrice == LONG_MAX) exit(-1);
 	exit(0);
 } 

@@ -8,21 +8,25 @@ namespace TravellingSalesman
 {
     public partial class MainForm : Form
     {
-        private readonly MatrixIO _dataGridViewManual = new MatrixIO
+        private static readonly Random Rnd = new Random();
+
+        private readonly MatrixIO _dataGridViewMatrix = new MatrixIO
         {
             ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
             Dock = DockStyle.Fill,
-            Name = "dataGridViewManual",
+            Name = "dataGridViewMatrix",
             RowTemplate = {Height = 20},
             TabIndex = 0
         };
+
+        private readonly RandomDialog _randomDialog = new RandomDialog();
 
         private readonly Settings _settings = new Settings();
 
         public MainForm()
         {
             InitializeComponent();
-            splitContainer1.Panel1.Controls.Add(_dataGridViewManual);
+            splitContainer1.Panel1.Controls.Add(_dataGridViewMatrix);
             timer1.Interval = 1000;
             timer1.Start();
         }
@@ -60,36 +64,56 @@ namespace TravellingSalesman
                 throw new NotImplementedException();
 
             int n = 0;
-            string[,] thedata = _dataGridViewManual.TheData;
-            for (int i = 0; i < thedata.GetLength(0); i++)
-                for (int j = 0; j < thedata.GetLength(1); j++)
+            string[,] theData = _dataGridViewMatrix.TheData;
+            for (int i = 0; i < theData.GetLength(0); i++)
+                for (int j = 0; j < theData.GetLength(1); j++)
                 {
-                    if (string.IsNullOrEmpty(thedata[i, j])) continue;
+                    if (string.IsNullOrEmpty(theData[i, j])) continue;
                     n = Math.Max(n, i);
                     n = Math.Max(n, j);
                 }
 
             foreach (
                 DataGridViewCell cell in
-                    from DataGridViewRow row in _dataGridViewManual.Rows
+                    from DataGridViewRow row in _dataGridViewMatrix.Rows
                     from DataGridViewCell cell in row.Cells
                     select cell)
                 cell.Style.BackColor = Color.Yellow;
-            for (int i = 0; i < thedata.GetLength(0) && i < thedata.GetLength(1); i++)
-                _dataGridViewManual.Rows[i].Cells[i].Style.BackColor = Color.Red;
+            for (int i = 0; i < theData.GetLength(0) && i < theData.GetLength(1); i++)
+                _dataGridViewMatrix.Rows[i].Cells[i].Style.BackColor = Color.Red;
 
             algorithm.Matrix = new string[n + 1, n + 1];
             for (int i = 0; i <= n; i++)
                 for (int j = 0; j <= n; j++)
-                    algorithm.Matrix[i, j] = thedata[i, j];
+                    algorithm.Matrix[i, j] = theData[i, j];
+
+            DateTime start = DateTime.Now;
             int exitCode = await algorithm.Run();
+            DateTime end = DateTime.Now;
+            
             if (exitCode == 0)
             {
                 foreach (var pair in algorithm.Solution)
-                    _dataGridViewManual.Rows[Convert.ToInt32(pair[0])].Cells[Convert.ToInt32(pair[1])].Style.BackColor =
+                    _dataGridViewMatrix.Rows[Convert.ToInt32(pair[0])].Cells[Convert.ToInt32(pair[1])].Style.BackColor =
                         Color.Green;
             }
             textBox1.Text = algorithm.Log;
+            var timeSpan = new TimeSpan(end.Ticks - start.Ticks);
+            MessageBox.Show(timeSpan.ToString());
+        }
+
+        private void randomToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_randomDialog.ShowDialog() != DialogResult.OK) return;
+            int n = _randomDialog.MatrixRank;
+            int p = _randomDialog.Probability;
+            var theData = new string[n, n];
+
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    if (i != j && Rnd.Next(100) <= p)
+                        theData[i, j] = Rnd.Next(Int32.MaxValue/(n*n)).ToString(CultureInfo.InvariantCulture);
+            _dataGridViewMatrix.TheData = theData;
         }
     }
 }

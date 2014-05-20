@@ -1,0 +1,11 @@
+D:\Projects\TravellingSalesman\TravellingSalesman\bin\x64\Release\TravellingSalesman.exe.config
+D:\Projects\TravellingSalesman\Release\TravellingSalesman.exe.config
+D:\Projects\TravellingSalesman\Release\TravellingSalesman.exe
+D:\Projects\TravellingSalesman\Release\TravellingSalesman.pdb
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\x64\Release\TravellingSalesman.csprojResolveAssemblyReference.cache
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\x64\Release\TravellingSalesman.MainForm.resources
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\x64\Release\TravellingSalesman.Properties.Resources.resources
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\x64\Release\TravellingSalesman.Settings.resources
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\x64\Release\TravellingSalesman.csproj.GenerateResource.Cache
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\x64\Release\TravellingSalesman.exe
+D:\Projects\TravellingSalesman\TravellingSalesman\obj\x64\Release\TravellingSalesman.pdb

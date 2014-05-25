@@ -64,18 +64,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CudaLittleAlgorithm.cs" />
-    <Compile Include="ILittleAlgorithm.cs" />
-    <Compile Include="LittleAlgorithm.cs" />
+    <Compile Include="Algorithm.cs" />
+    <Compile Include="Cuda\CudaFloydAlgorithm.cs" />
+    <Compile Include="Cuda\CudaLittleAlgorithm.cs" />
+    <Compile Include="Floyd\FloydAlgorithm.cs" />
+    <Compile Include="Floyd\IFloydAlgorithm.cs" />
+    <Compile Include="IAlgorithm.cs" />
+    <Compile Include="Little\ILittleAlgorithm.cs" />
+    <Compile Include="Little\LittleAlgorithm.cs" />
     <Compile Include="MatrixIO.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="MpiLittleAlgorithm.cs" />
+    <Compile Include="Mpi\MpiFloydAlgorithm.cs" />
+    <Compile Include="Mpi\MpiLittleAlgorithm.cs" />
     <Compile Include="RandomDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="RandomDialog.Designer.cs">
       <DependentUpon>RandomDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SameDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SameDialog.Designer.cs">
+      <DependentUpon>SameDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs">
       <SubType>Form</SubType>
@@ -106,6 +118,9 @@
     <EmbeddedResource Include="RandomDialog.resx">
       <DependentUpon>RandomDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SameDialog.resx">
+      <DependentUpon>SameDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>
@@ -121,6 +136,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MyLibrary\MyLibrary\MyLibrary.csproj">
+      <Project>{e80cf993-5e07-4875-85fe-a2adcf76558d}</Project>
+      <Name>MyLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

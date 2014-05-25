@@ -1,0 +1,12 @@
+﻿Сборка начата 25.05.2014 4:01:48.
+     1>Проект "D:\Projects\TravellingSalesman\cudafloyd\cudafloyd.vcxproj" в узле 2 (целевые объекты Clean).
+     1>CudaClean:
+         cmd.exe /C "X:\Temp\tmp489e1673fbb04e75bc166b6ea3cd2980.cmd"
+         "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile      -DWIN32 -DNDEBUG -D_CONSOLE -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\floyd.cu.obj "D:\Projects\TravellingSalesman\cudafloyd\floyd.cu" -clean
+         
+         D:\Projects\TravellingSalesman\cudafloyd>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile      -DWIN32 -DNDEBUG -D_CONSOLE -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\floyd.cu.obj "D:\Projects\TravellingSalesman\cudafloyd\floyd.cu" -clean 
+     1>Построение проекта "D:\Projects\TravellingSalesman\cudafloyd\cudafloyd.vcxproj" завершено (целевые объекты Clean).
+
+Построение успешно завершено.
+
+Затраченное время: 00:00:00.74

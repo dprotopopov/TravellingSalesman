@@ -160,7 +160,6 @@
     <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="1.csv" />
     <CudaCompile Include="little.cu">
       <FileType>Document</FileType>
     </CudaCompile>

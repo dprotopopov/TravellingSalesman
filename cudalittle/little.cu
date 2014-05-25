@@ -29,10 +29,11 @@ char *description = "Алгоритм Литтла - метод решения �
 (исключая элемент Сi,j=0) и наименьшего элемента j столбца.
 Проверяем, что не существует однозначных путей - то есть с одним входом и выходом
 Если такой путь есть, то выбираем его
-иначе Из всех коэффициентов  Гi,j выберем такой, который является максимальным Гk,l=max{Гi,j}.
-В гамильтонов контур вносится соответствующая дуга (k,l).
-Удаляем k-тую строку и столбец l, поменяем на бесконечность значение элемента Сl,k (поскольку дуга (k,l) включена в контур,
-то обратный путь из l в k недопустим).
+иначе Из всех коэффициентов  Гi,j выберем такой, который является максимальным Гk,m=max{Гi,j}.
+В гамильтонов контур вносится соответствующая дуга (k,m).
+Удаляем k-тую строку и столбец m. 
+Поменяем на бесконечность значение элемент Сr,l для всех путей (l,...,k,m,...r) из добавленных дуг, 
+содежащих дугу (k,m) (иначе может образоваться простой цикл).
 Повторяем алгоритм шага 1, пока порядок матрицы не станет равным одному.
 Получаем гамильтонов контур.
 В ходе решения ведется постоянный подсчет текущего значения нижней границы.
@@ -123,13 +124,40 @@ __global__ void global_queue_oneway_b(int *queue, int *qsize, long *lbound, long
 		}
 	}
 }
-__global__ void global_add_forbidden(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
-	for (int id = n + blockDim.x*blockIdx.x + threadIdx.x; id < rank; id += blockDim.x*gridDim.x) {
-		int i; for (i = n; i-- > 0;) if (rows[i] == to[id]) break; /* Номер строки */
-		int j; for (j = n; j-- > 0;) if (cols[j] == from[id]) break; /* Номер столбца */
+/*
+Добавление запрещённых переходов.
+	Шаг первый.
+		Последнюю добавленную дугу помещаем в середину массива.
+		Массив нарашиваем слева и справа.
+	Шаг второй.
+		Запрещаем все дуги ведущие из правой половины массива в левую половину массива.
+*/
+__global__ void global_add_forbidden_a(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
+	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < 1; id += blockDim.x*gridDim.x) {
+		im[0] = im[1] = rank;
+		islice[--im[0]] = islice[im[1]++] = n;
+		while(1==1){
+			int id1; for(id1 = rank; id1-->n ; ) if (to[id1]==from[islice[im[0]]]) break;
+			if (id1>n) islice[--im[0]] = id1; else break;
+		}
+		while(1==1){
+			int id2; for(id2 = rank; id2-->n ; ) if (from[id2]==to[islice[im[1]-1]]) break;
+			if (id2>n) islice[im[1]++] = id2; else break;
+		}
+	}
+}
+__global__ void global_add_forbidden_b(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
+	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < (rank-im[0])*(im[1]-rank); id += blockDim.x*gridDim.x) {
+		int id1 = islice[rank - (id%(rank-im[0])) - 1];
+		int id2 = islice[rank + (id/(rank-im[0]))];
+		int i; for (i = n; i-- > 0;) if (rows[i] == to[id2]) break; /* Номер строки */
+		int j; for (j = n; j-- > 0;) if (cols[j] == from[id1]) break; /* Номер столбца */
 		if (i != -1 && j != -1) matrix[i*n + j] = LONG_MAX;
 	}
 }
+/*
+Удаление строки im[0] и столбца im[1], соответствующих последней добавленной дуге (im[0],im[1])
+*/
 __global__ void global_matrix_trunc(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	/* Удаляем строку и столбец параллельно в процессах */
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < (n - 1)*(n - 1); id += blockDim.x*gridDim.x) {
@@ -149,6 +177,12 @@ __global__ void global_queue_indexes_of_max(int *queue, int *qsize, long *lbound
 		}
 	}
 }
+/*
+Нахождение максимального индекса максимального элемента массива gamma
+Возвращаемые значения:
+	im[0] - индекс максимального элемента
+	lm[1] - значение максимального элемента
+*/
 __global__ void global_gamma_max_index_of_max_a(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n; id += blockDim.x*gridDim.x) {
 		islice[id] = id*n; 
@@ -173,6 +207,15 @@ __global__ void global_gamma_max_index_of_max_b(int *queue, int *qsize, long *lb
 		}
 	}
 }
+/*
+Для каждого нулевого элемента матрицы cij  рассчитаем коэффициент Гi,j, 
+который равен сумме наименьшего элемента i строки (исключая элемент Сi,j=0) 
+и наименьшего элемента j столбца.
+Возвращаемые значения:
+	gamma - массив рассчитанных коэффициентов
+
+Массив gamma представляет собой расчёт минимальной цены въезда и выезда из города
+*/
 __global__ void global_calc_gamma(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long *matrix_1, long *matrix, int *rows, int *cols, int *from, int *to, int *im, long *lm, int n, int rank){
 	/* Расчитываем коэффициенты параллельно в процессах */
 	for (int id = blockDim.x*blockIdx.x + threadIdx.x; id < n*n; id += blockDim.x*gridDim.x) {
@@ -307,7 +350,7 @@ __global__ void global_initialize(int *queue, int *qsize, long *lbound, long *ga
 	}
 }
 /*
-	В случае неправильных параметров возвращённая лучшая цена имеет отрицвтельное значение
+	В случае неправильных параметров возвращённая лучшая цена имеет LONG_MAX значение
 */
 __host__ void host_little(long *data, int *bestFrom, int *bestTo, long *bestPrice, int rank)
 {
@@ -356,7 +399,7 @@ __host__ void host_little(long *data, int *bestFrom, int *bestTo, long *bestPric
 	err = cudaMalloc((void**)&qsize ,(n + 2)*sizeof(int));
 	err = cudaMalloc((void**)&gamma,n*n*sizeof(long));
 
-	cudaMemcpy(matrix[n], data, n*n*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(matrix[n], data, n*n*sizeof(long), cudaMemcpyHostToDevice);
 
 	global_initialize <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 	*bestPrice = LONG_MAX;
@@ -439,6 +482,9 @@ __host__ void host_little(long *data, int *bestFrom, int *bestTo, long *bestPric
 			}
 		}
 
+		int blocks0 = min(max(1, (int)pow((double)(rank-n), 0.6666666666666)), 15);
+		int threads0 = min(max(1, (int)pow((double)(rank-n), 0.6666666666666)), 15);
+
 		int blocks1 = min(max(1, (int)pow((double)n, 0.333333333333333)), 15);
 		int threads1 = min(max(1, (int)pow((double)n, 0.333333333333333)), 15);
 
@@ -447,18 +493,19 @@ __host__ void host_little(long *data, int *bestFrom, int *bestTo, long *bestPric
 
 		global_sum_lbound_begin <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
-		printf(" global_add_forbidden \n");
-		/* Запрещаем обратные переходы */
-		global_add_forbidden <<< blocks, threads >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
-
-		cudaMemcpy(lbuffer, matrix[n], n*n*sizeof(long), cudaMemcpyDeviceToHost);
-		for (int i = 0; i < n; i++){
-			for (int j = 0; j < n; j++){
-				printf("%ld%s", lbuffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
-			}
-		}
-
 		if (n > 1)  {
+			printf(" global_add_forbidden \n");
+			/* Запрещаем обратные переходы */
+			global_add_forbidden_a <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+			global_add_forbidden_b <<< blocks0, threads0 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
+
+			cudaMemcpy(lbuffer, matrix[n], n*n*sizeof(long), cudaMemcpyDeviceToHost);
+			for (int i = 0; i < n; i++){
+				for (int j = 0; j < n; j++){
+					printf("%ld%s", lbuffer[i*n + j], ((j == n - 1) ? "\n" : "\t"));
+				}
+			}
+
 			cudaMemcpy(&qsize[n], &qsize[n + 1], sizeof(int), cudaMemcpyDeviceToDevice);
 
 			printf(" global_min_by_row \n");
@@ -631,22 +678,22 @@ the_end:
 
 	free(ibuffer);
 	free(lbuffer);
-	for (int i = 1; i <= n; i++) cudaFree(matrix[i]);
-	for (int i = 1; i <= n; i++) cudaFree(rows[i]);
-	for (int i = 1; i <= n; i++) cudaFree(cols[i]);
+	for (int i = 1; i <= n; i++) err = cudaFree(matrix[i]);
+	for (int i = 1; i <= n; i++) err = cudaFree(rows[i]);
+	for (int i = 1; i <= n; i++) err = cudaFree(cols[i]);
 	free(matrix);
 	free(rows);
 	free(cols);
-	cudaFree(gamma);
-	cudaFree(lbound);
-	cudaFree(queue);
-	cudaFree(qsize);
-	cudaFree(from);
-	cudaFree(to);
-	cudaFree(islice);
-	cudaFree(lslice);
-	cudaFree(im);
-	cudaFree(lm);
+	err = cudaFree(gamma);
+	err = cudaFree(lbound);
+	err = cudaFree(queue);
+	err = cudaFree(qsize);
+	err = cudaFree(from);
+	err = cudaFree(to);
+	err = cudaFree(islice);
+	err = cudaFree(lslice);
+	err = cudaFree(im);
+	err = cudaFree(lm);
 
 	err = err;
 }
@@ -657,6 +704,8 @@ int main(int argc, char* argv[])
 
 	if (argc < 3) {
 		printf("Usage :\t%s <inputfilename> <outputfilename>\n", argv[0]); fflush(stdout);
+		printf("\tinputfilename - source matrix of path prices or empty\n"); fflush(stdout);
+		printf("\toutputfilename - output best path point-to-point segments\n"); fflush(stdout);
 		exit(-1);
 	}
 

@@ -18,9 +18,6 @@
     <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="1.csv" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="little.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>

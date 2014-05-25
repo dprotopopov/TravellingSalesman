@@ -31,10 +31,11 @@ char *description = "Алгоритм Литтла - метод решения �
 (исключая элемент Сi,j=0) и наименьшего элемента j столбца. 
 Проверяем, что не существует однозначных путей - то есть с одним входом и выходом
 Если такой путь есть, то выбираем его
-иначе Из всех коэффициентов  Гi,j выберем такой, который является максимальным Гk,l=max{Гi,j}. 
-В гамильтонов контур вносится соответствующая дуга (k,l).
-Удаляем k-тую строку и столбец l, поменяем на бесконечность значение элемента Сl,k (поскольку дуга (k,l) включена в контур, 
-то обратный путь из l в k недопустим).
+иначе Из всех коэффициентов  Гi,j выберем такой, который является максимальным Гk,m=max{Гi,j}.
+В гамильтонов контур вносится соответствующая дуга (k,m).
+Удаляем k-тую строку и столбец m. 
+Поменяем на бесконечность значение элемент Сr,l для всех путей (l,...,k,m,...r) из добавленных дуг, 
+содежащих дугу (k,m) (иначе может образоваться простой цикл).
 Повторяем алгоритм шага 1, пока порядок матрицы не станет равным одному.
 Получаем гамильтонов контур.
 В ходе решения ведется постоянный подсчет текущего значения нижней границы. 
@@ -99,13 +100,38 @@ void _mpi_queue_oneway(int *queue, int *qsize, long *lbound, long *gamma, int *i
 		}
 	}
 }
-void _mpi_add_forbidden(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
-	int id; for (id = n; id < rank; id++) {
-		int i; for (i = n; i-- > 0;) if (rows[n][i] == to[id]) break; /* Номер строки */
-		int j; for (j = n; j-- > 0;) if (cols[n][j] == from[id]) break; /* Номер столбца */
+/*
+Добавление запрещённых переходов.
+	Шаг первый.
+		Последнюю добавленную дугу помещаем в середину массива.
+		Массив нарашиваем слева и справа.
+	Шаг второй.
+		Запрещаем все дуги ведущие из правой половины массива в левую половину массива.
+*/
+void _mpi_add_forbidden_a(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
+	im[0] = im[1] = rank;
+	islice[--im[0]] = islice[im[1]++] = n;
+	while(1==1){
+		int id1; for(id1 = rank; id1-->n ; ) if (to[id1]==from[islice[im[0]]]) break;
+		if (id1>n) islice[--im[0]] = id1; else break;
+	}
+	while(1==1){
+		int id2; for(id2 = rank; id2-->n ; ) if (from[id2]==to[islice[im[1]-1]]) break;
+		if (id2>n) islice[im[1]++] = id2; else break;
+	}
+}
+void _mpi_add_forbidden_b(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
+	for (int id = 0; id < (rank-im[0])*(im[1]-rank); id++) {
+		int id1 = islice[rank - (id%(rank-im[0])) - 1];
+		int id2 = islice[rank + (id/(rank-im[0]))];
+		int i; for (i = n; i-- > 0;) if (rows[n][i] == to[id2]) break; /* Номер строки */
+		int j; for (j = n; j-- > 0;) if (cols[n][j] == from[id1]) break; /* Номер столбца */
 		if (i != -1 && j != -1) matrix[n][i*n + j] = LONG_MAX;
 	}
 }
+/*
+Удаление строки im[0] и столбца im[1], соответствующих последней добавленной дуге (im[0],im[1])
+*/
 void _mpi_rowscols_trunc(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Удаляем строку и столбец в процессах */
 	memmove(rows[n - 1], rows[n], im[0] * sizeof(int));
@@ -152,6 +178,12 @@ void _mpi_join_queue(int *queue, int *qsize, long *lbound, long *gamma, int *isl
 	MPI_Bcast(&qsize[n], 1, MPI_INT, 0, MPI_COMM_WORLD);
 	if (qsize[n + 1] > qsize[n]) MPI_Bcast(&queue[qsize[n]], (qsize[n + 1] - qsize[n]), MPI_INT, 0, MPI_COMM_WORLD);
 }
+/*
+Нахождение максимального индекса максимального элемента массива gamma
+Возвращаемые значения:
+	im[0] - индекс максимального элемента
+	lm[1] - значение максимального элемента
+*/
 void _mpi_gamma_max_index_of_max(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Находим максимальный индекс максимального коэффициента параллельно в процессах */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
@@ -179,6 +211,15 @@ void _mpi_gamma_max_index_of_max(int *queue, int *qsize, long *lbound, long *gam
 	MPI_Bcast(&im[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
 	lm[1] = gamma[im[0]];
 }
+/*
+Для каждого нулевого элемента матрицы cij  рассчитаем коэффициент Гi,j, 
+который равен сумме наименьшего элемента i строки (исключая элемент Сi,j=0) 
+и наименьшего элемента j столбца.
+Возвращаемые значения:
+	gamma - массив рассчитанных коэффициентов
+
+Массив gamma представляет собой расчёт минимальной цены въезда и выезда из города
+*/
 void _mpi_calc_gamma(int *queue, int *qsize, long *lbound, long *gamma, int *islice, long *lslice, long **matrix, int **rows, int **cols, int *from, int *to, int *im, long *lm, int n, int rank, int myrank, int nrank, MPI_Status *status){
 	/* Расчитываем коэффициенты параллельно в процессах */
 	/* Каждый процесс обрабатывает подмножество матрицы из n*n / nrank элементов */
@@ -258,10 +299,9 @@ void _mpi_join_min_slice(int *queue, int *qsize, long *lbound, long *gamma, int 
 		int i; for (i = 1; i < nrank; i++){
 			int j = ((int)(i*n*n / nrank)) / n; /* Начиная с индекса */
 			int k = ((int)(((i + 1)*n*n + nrank - 1) / nrank) + n - 1) / n; /* До индекса ( не включтельно ) */
-			if (k > j) {
-				MPI_Recv(&lslice[n + j], k - j, MPI_LONG, i, DATA_TAG, MPI_COMM_WORLD, status);
-				MPI_Recv(&islice[n + j], k - j, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
-			}
+			if(j==k) continue;
+			MPI_Recv(&lslice[n + j], k - j, MPI_LONG, i, DATA_TAG, MPI_COMM_WORLD, status);
+			MPI_Recv(&islice[n + j], k - j, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
 			for (; j < k; j++) {
 				lslice[j] = min(lslice[j], lslice[n + j]);
 				islice[j] = min(islice[j], islice[n + j]);
@@ -287,10 +327,9 @@ void _mpi_join_max_slice(int *queue, int *qsize, long *lbound, long *gamma, int 
 		int i; for (i = 1; i < nrank; i++){
 			int j = ((int)(i*n*n / nrank)) / n; /* Начиная с индекса */
 			int k = ((int)(((i + 1)*n*n + nrank - 1) / nrank) + n - 1) / n; /* До индекса ( не включтельно ) */
-			if (k > j) {
-				MPI_Recv(&lslice[n + j], k - j, MPI_LONG, i, DATA_TAG, MPI_COMM_WORLD, status);
-				MPI_Recv(&islice[n + j], k - j, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
-			}
+			if(j==k) continue;
+			MPI_Recv(&lslice[n + j], k - j, MPI_LONG, i, DATA_TAG, MPI_COMM_WORLD, status);
+			MPI_Recv(&islice[n + j], k - j, MPI_INT, i, DATA_TAG, MPI_COMM_WORLD, status);
 			for (; j < k; j++) {
 				lslice[j] = max(lslice[j], lslice[n + j]);
 				islice[j] = max(islice[j], islice[n + j]);
@@ -465,6 +504,8 @@ int main(int argc, char *argv[])
 
 	if (myrank == 0 && argc < 3) {
 		printf("Usage :\t%s <inputfilename> <outputfilename>\n", argv[0]); fflush(stdout);
+		printf("\tinputfilename - source matrix of path prices or empty\n"); fflush(stdout);
+		printf("\toutputfilename - output best path point-to-point segments\n"); fflush(stdout);
 		exit(-1);
 	}
 
@@ -670,23 +711,24 @@ int main(int argc, char *argv[])
 
 		_mpi_sum_lbound_begin(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
 		
-		if (myrank == 0) {
-			printf(" _mpi_add_forbidden \n");
-			fflush(stdout);
-		}
-		/* Запрещаем обратные переходы */
-		_mpi_add_forbidden(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
-
-		if (myrank == 0) {
-			for (i = 0; i < n; i++){
-				for (j = 0; j < n; j++){
-					printf("%ld%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
-				}
-			}
-			fflush(stdout);
-		}
-
 		if (n > 1)  {
+			if (myrank == 0) {
+				printf(" _mpi_add_forbidden \n");
+				fflush(stdout);
+			}
+			/* Запрещаем обратные переходы */
+			_mpi_add_forbidden_a(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+			_mpi_add_forbidden_b(queue, qsize, lbound, gamma, islice, lslice, matrix, rows, cols, from, to, im, lm, n, rank, myrank, nrank, &status);
+
+			if (myrank == 0) {
+				for (i = 0; i < n; i++){
+					for (j = 0; j < n; j++){
+						printf("%ld%s", matrix[n][i*n + j], ((j == n - 1) ? "\n" : "\t"));
+					}
+				}
+				fflush(stdout);
+			}
+
 			qsize[n] = qsize[n + 1];
 
 			if (myrank == 0) {

@@ -126,7 +126,7 @@ __global__ void global_floyd(long *prev, long *next, int *intermedian, int m, in
 	}
 }
 
-__host__ void host_floyd(long *matrix, int *intermedian, int n)
+__host__ void host_floyd(int gridSize, int blockSize, long *matrix, int *intermedian, int n)
 {
 	cudaError_t err;
 	long *device_prev;
@@ -139,8 +139,8 @@ __host__ void host_floyd(long *matrix, int *intermedian, int n)
 
 	err = cudaMemcpy(device_prev, matrix, n*n*sizeof(long), cudaMemcpyHostToDevice);
 
-	int blocks = min(max(1, (int)pow((double)n*n, 0.333333333333333)), 15);
-	int threads = min(max(1, (int)pow((double)n*n, 0.333333333333333)), 15);
+	int blocks = (gridSize > 0)? gridSize : min(max(1, (int)pow((double)n*n, 0.333333333333333)), 15);
+	int threads = (blockSize > 0)? blockSize : min(max(1, (int)pow((double)n*n, 0.333333333333333)), 15);
 	global_init <<< blocks, threads >>>(device_prev, device_next, device_intermedian, -1, n);
 
 	for(int m = 0; m < n ; m++){
@@ -167,19 +167,34 @@ __host__ void host_floyd(long *matrix, int *intermedian, int n)
 
 int main(int argc, char* argv[])
 {
+	int gridSize = 0;
+	int blockSize = 0;
+
 	printf("Title :\t%s\n", title); fflush(stdout);
 
 	if (argc < 4) {
-		printf("Usage :\t%s <inputfilename> <outputfilename> <intermedianfilename>\n", argv[0]); fflush(stdout);
+		printf("Usage :\t%s [-g <gridSize>] [-b <blockSize>] <inputfilename> <outputfilename> <intermedianfilename>\n", argv[0]); fflush(stdout);
 		printf("\tinputfilename - source matrix of path prices or empty\n"); fflush(stdout);
 		printf("\toutputfilename - output floyd's matrix of path prices\n"); fflush(stdout);
 		printf("\tintermedianfilename - output matrix of intermedian points or empty\n"); fflush(stdout);
 		exit(-1);
 	}
 
-	char *inputFileName = argv[1];
-	char *outputFileName = argv[2];
-	char *intermedianFileName = argv[3];
+	int argId = 1;
+	for(; argId < argc && argv[argId][0]=='-' ; argId++){
+		switch(argv[argId][1]){
+		case 'g':
+			gridSize = atoi(argv[++argId]);
+			break;
+		case 'b':
+			blockSize = atoi(argv[++argId]);
+			break;
+		}
+	}
+
+	char *inputFileName = argv[argId++];
+	char *outputFileName = argv[argId++];
+	char *intermedianFileName = argv[argId++];
 
 	printf("Input File Name :\t%s\n", inputFileName); fflush(stdout);
 	printf("Output File Name :\t%s\n", outputFileName); fflush(stdout);
@@ -255,7 +270,7 @@ int main(int argc, char* argv[])
 		printf("Running on GPU %d (%s)\n", i, properties.name); fflush(stdout);
 	}
 
-	host_floyd(matrix, intermedian, n);
+	host_floyd(gridSize, blockSize, matrix, intermedian, n);
 
 	cudaDeviceReset();
 

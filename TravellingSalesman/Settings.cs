@@ -1,4 +1,6 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Globalization;
+using System.Windows.Forms;
 
 namespace TravellingSalesman
 {
@@ -9,21 +11,22 @@ namespace TravellingSalesman
             InitializeComponent();
         }
 
-        public Settings(int median, int noise, int sci)
-            : this()
-        {
-        }
-
         public int NumberOfProcess
         {
-            get { return (int) numericUpDownNumberOfProcess.Value; }
+            get { return Convert.ToInt32(numericUpDownNumberOfProcess.Value); }
             set { numericUpDownNumberOfProcess.Value = value; }
         }
 
-        public int VideoMemorySize
+        public int GridSize
         {
-            get { return (int) numericUpDownVideoMemorySize.Value; }
-            set { numericUpDownVideoMemorySize.Value = value; }
+            get { return Convert.ToInt32(numericUpDownGridSize.Value); }
+            set { numericUpDownGridSize.Value = value; }
+        }
+
+        public int BlockSize
+        {
+            get { return Convert.ToInt32(numericUpDownBlockSize.Value); }
+            set { numericUpDownBlockSize.Value = value; }
         }
 
         public bool IsCudaEngine
@@ -34,6 +37,11 @@ namespace TravellingSalesman
         public bool IsMpiEngine
         {
             get { return radioButtonMpiEngine.Checked; }
+        }
+
+        private void ValueChanged(object sender, EventArgs e)
+        {
+            textBox1.Text = (GridSize*BlockSize).ToString(CultureInfo.InvariantCulture);
         }
     }
 }

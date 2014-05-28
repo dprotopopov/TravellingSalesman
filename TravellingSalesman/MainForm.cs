@@ -69,7 +69,7 @@ namespace TravellingSalesman
         {
             ILittleAlgorithm little;
             if (_settings.IsCudaEngine)
-                little = new CudaLittleAlgorithm();
+                little = new CudaLittleAlgorithm(_settings.GridSize, _settings.BlockSize);
             else if (_settings.IsMpiEngine)
                 little = new MpiLittleAlgorithm(_settings.NumberOfProcess);
             else
@@ -149,7 +149,7 @@ namespace TravellingSalesman
         {
             IFloydAlgorithm floyd;
             if (_settings.IsCudaEngine)
-                floyd = new CudaFloydAlgorithm();
+                floyd = new CudaFloydAlgorithm(_settings.GridSize, _settings.BlockSize);
             else if (_settings.IsMpiEngine)
                 floyd = new MpiFloydAlgorithm(_settings.NumberOfProcess);
             else
@@ -209,8 +209,8 @@ namespace TravellingSalesman
             ILittleAlgorithm little;
             if (_settings.IsCudaEngine)
             {
-                floyd = new CudaFloydAlgorithm();
-                little = new CudaLittleAlgorithm
+                floyd = new CudaFloydAlgorithm(_settings.GridSize, _settings.BlockSize);
+                little = new CudaLittleAlgorithm(_settings.GridSize, _settings.BlockSize)
                 {
                     InputFileName = floyd.OutputFileName
                 };

@@ -26,6 +26,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{EF6CE7
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FD99E9C2-7895-4C6F-AE05-74F6532348D7}"
+	ProjectSection(SolutionItems) = preProject
+		README.txt = README.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +68,7 @@ Global
 		{F400998F-171C-49BF-8311-E4E721102473}.Debug|Win32.ActiveCfg = Debug|Win32
 		{F400998F-171C-49BF-8311-E4E721102473}.Debug|Win32.Build.0 = Debug|Win32
 		{F400998F-171C-49BF-8311-E4E721102473}.Debug|x64.ActiveCfg = Debug|x64
+		{F400998F-171C-49BF-8311-E4E721102473}.Debug|x64.Build.0 = Debug|x64
 		{F400998F-171C-49BF-8311-E4E721102473}.Debug|x86.ActiveCfg = Debug|Win32
 		{F400998F-171C-49BF-8311-E4E721102473}.Debug|x86.Build.0 = Debug|Win32
 		{F400998F-171C-49BF-8311-E4E721102473}.Release|Any CPU.ActiveCfg = Release|Win32

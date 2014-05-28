@@ -352,7 +352,7 @@ __global__ void global_initialize(int *queue, int *qsize, long *lbound, long *ga
 /*
 	В случае неправильных параметров возвращённая лучшая цена имеет LONG_MAX значение
 */
-__host__ void host_little(long *data, int *bestFrom, int *bestTo, long *bestPrice, int rank)
+__host__ void host_little(int gridSize, int blockSize, long *data, int *bestFrom, int *bestTo, long *bestPrice, int rank)
 {
 	cudaError_t err;
 	int n;         /* Ранг текущего массива */
@@ -404,8 +404,8 @@ __host__ void host_little(long *data, int *bestFrom, int *bestTo, long *bestPric
 	global_initialize <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n-1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 	*bestPrice = LONG_MAX;
 
-	int blocks = min(max(1, (int)pow((double)rank, 0.333333333333333)), 15);
-	int threads = min(max(1, (int)pow((double)rank, 0.333333333333333)), 15);
+	int blocks = (gridSize > 0)? gridSize : min(max(1, (int)pow((double)rank, 0.333333333333333)), 15);
+	int threads = (blockSize > 0)? blockSize : min(max(1, (int)pow((double)rank, 0.333333333333333)), 15);
 
 	ivalue[1] = 1;
 	printf(" Check Graph by rows \n");
@@ -482,14 +482,14 @@ __host__ void host_little(long *data, int *bestFrom, int *bestTo, long *bestPric
 			}
 		}
 
-		int blocks0 = min(max(1, (int)pow((double)(rank-n), 0.6666666666666)), 15);
-		int threads0 = min(max(1, (int)pow((double)(rank-n), 0.6666666666666)), 15);
+		int blocks0 = (gridSize > 0)? gridSize : min(max(1, (int)pow((double)(rank-n), 0.6666666666666)), 15);
+		int threads0 = (blockSize > 0)? blockSize : min(max(1, (int)pow((double)(rank-n), 0.6666666666666)), 15);
 
-		int blocks1 = min(max(1, (int)pow((double)n, 0.333333333333333)), 15);
-		int threads1 = min(max(1, (int)pow((double)n, 0.333333333333333)), 15);
+		int blocks1 = (gridSize > 0)? gridSize : min(max(1, (int)pow((double)n, 0.333333333333333)), 15);
+		int threads1 = (blockSize > 0)? blockSize : min(max(1, (int)pow((double)n, 0.333333333333333)), 15);
 
-		int blocks2 = min(max(1, (int)pow((double)n, 0.66666666666666)), 15);
-		int threads2 = min(max(1, (int)pow((double)n, 0.66666666666666)), 15);
+		int blocks2 = (gridSize > 0)? gridSize : min(max(1, (int)pow((double)n, 0.66666666666666)), 15);
+		int threads2 = (blockSize > 0)? blockSize : min(max(1, (int)pow((double)n, 0.66666666666666)), 15);
 
 		global_sum_lbound_begin <<< 1, 1 >>>(queue, qsize, lbound, gamma, islice, lslice, matrix[n - 1], matrix[n], rows[n], cols[n], from, to, im, lm, n, rank);
 
@@ -700,17 +700,32 @@ the_end:
 
 int main(int argc, char* argv[])
 {
+	int gridSize = 0;
+	int blockSize = 0;
+
 	printf("Title :\t%s\n", title); fflush(stdout);
 
 	if (argc < 3) {
-		printf("Usage :\t%s <inputfilename> <outputfilename>\n", argv[0]); fflush(stdout);
+		printf("Usage :\t%s [-g <gridSize>] [-b <blockSize>] <inputfilename> <outputfilename>\n", argv[0]); fflush(stdout);
 		printf("\tinputfilename - source matrix of path prices or empty\n"); fflush(stdout);
 		printf("\toutputfilename - output best path point-to-point segments\n"); fflush(stdout);
 		exit(-1);
 	}
 
-	char *inputFileName = argv[1];
-	char *outputFileName = argv[2];
+	int argId = 1;
+	for(; argId < argc && argv[argId][0]=='-' ; argId++){
+		switch(argv[argId][1]){
+		case 'g':
+			gridSize = atoi(argv[++argId]);
+			break;
+		case 'b':
+			blockSize = atoi(argv[++argId]);
+			break;
+		}
+	}
+
+	char *inputFileName = argv[argId++];
+	char *outputFileName = argv[argId++];
 
 	char buffer[4096];
 	char *tok;
@@ -788,7 +803,7 @@ int main(int argc, char* argv[])
 		printf("Running on GPU %d (%s)\n", i, properties.name); fflush(stdout);
 	}
 
-	host_little(matrix, bestFrom, bestTo, &bestPrice, n);
+	host_little(gridSize, blockSize, matrix, bestFrom, bestTo, &bestPrice, n);
 
 	cudaDeviceReset();
 

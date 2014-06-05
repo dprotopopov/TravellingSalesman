@@ -1,5 +1,5 @@
-﻿Сборка начата 28.05.2014 22:05:11.
-     1>Проект "D:\Projects\TravellingSalesman\mpilittle\mpilittle.vcxproj" в узле 3 (целевые объекты Rebuild).
+﻿Сборка начата 02.06.2014 20:37:35.
+     1>Проект "D:\Projects\TravellingSalesman\mpilittle\mpilittle.vcxproj" в узле 2 (целевые объекты Rebuild).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /Od /Oy- /Gm- /EHsc /MD /GS- /Gy- /fp:precise /Zc:wchar_t- /Zc:forScope /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt little.cpp
      1>cl : командная строка warning D9025: переопределение "/sdl" на "/GS-"
@@ -11,4 +11,4 @@
 
 Построение успешно завершено.
 
-Затраченное время: 00:00:01.20
+Затраченное время: 00:00:00.69

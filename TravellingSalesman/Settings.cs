@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows.Forms;
+using MiniMax.Forms;
 
 namespace TravellingSalesman
 {
@@ -10,6 +11,8 @@ namespace TravellingSalesman
         {
             InitializeComponent();
         }
+
+        public BuildChooseDialog CudaBuildChooseDialog { get; set; }
 
         public int NumberOfProcess
         {
@@ -39,9 +42,28 @@ namespace TravellingSalesman
             get { return radioButtonMpiEngine.Checked; }
         }
 
+        public BuildChooseDialog MpiBuildChooseDialog { get; set; }
+
         private void ValueChanged(object sender, EventArgs e)
         {
             textBox1.Text = (GridSize*BlockSize).ToString(CultureInfo.InvariantCulture);
+        }
+
+        private void buttonCudaChoose_Click(object sender, EventArgs e)
+        {
+            if (CudaBuildChooseDialog.ShowDialog() != DialogResult.OK) return;
+            MyLibrary.Collections.Properties values = CudaBuildChooseDialog.Values;
+            if (values == null) return;
+            GridSize = 1;
+            BlockSize = Convert.ToInt32(values["N"]);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (MpiBuildChooseDialog.ShowDialog() != DialogResult.OK) return;
+            MyLibrary.Collections.Properties values = MpiBuildChooseDialog.Values;
+            if (values == null) return;
+            NumberOfProcess = Convert.ToInt32(values["P"]);
         }
     }
 }

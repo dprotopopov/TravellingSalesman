@@ -3,6 +3,8 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using MiniMax.Forms;
+using MyFormula;
 using MyLibrary.Collections;
 using TravellingSalesman.Cuda;
 using TravellingSalesman.Floyd;
@@ -14,6 +16,21 @@ namespace TravellingSalesman
     public partial class MainForm : Form
     {
         private static readonly Random Rnd = new Random();
+
+        private static readonly BuildChooseDialog CudaBuildChooseDialog =
+            new BuildChooseDialog(typeof (MyCudaFormula));
+
+        private static readonly BuildChooseDialog MpiBuildChooseDialog =
+            new BuildChooseDialog(typeof (MyMpiFormula));
+
+        private static readonly RandomDialog RandomDialog = new RandomDialog();
+        private static readonly SameDialog SameDialog = new SameDialog();
+
+        private static readonly Settings Settings = new Settings
+        {
+            CudaBuildChooseDialog = CudaBuildChooseDialog,
+            MpiBuildChooseDialog = MpiBuildChooseDialog,
+        };
 
         private readonly MatrixIO _dataGridViewIntermedian = new MatrixIO
         {
@@ -33,11 +50,6 @@ namespace TravellingSalesman
             TabIndex = 0
         };
 
-        private readonly RandomDialog _randomDialog = new RandomDialog();
-        private readonly SameDialog _sameDialog = new SameDialog();
-
-        private readonly Settings _settings = new Settings();
-
         public MainForm()
         {
             InitializeComponent();
@@ -49,7 +61,7 @@ namespace TravellingSalesman
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (_settings.ShowDialog() == DialogResult.OK)
+            if (Settings.ShowDialog() == DialogResult.OK)
             {
                 // good
             }
@@ -68,10 +80,10 @@ namespace TravellingSalesman
         private async void runLittleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ILittleAlgorithm little;
-            if (_settings.IsCudaEngine)
-                little = new CudaLittleAlgorithm(_settings.GridSize, _settings.BlockSize);
-            else if (_settings.IsMpiEngine)
-                little = new MpiLittleAlgorithm(_settings.NumberOfProcess);
+            if (Settings.IsCudaEngine)
+                little = new CudaLittleAlgorithm(Settings.GridSize, Settings.BlockSize);
+            else if (Settings.IsMpiEngine)
+                little = new MpiLittleAlgorithm(Settings.NumberOfProcess);
             else
                 throw new NotImplementedException();
 
@@ -132,9 +144,9 @@ namespace TravellingSalesman
 
         private void randomToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (_randomDialog.ShowDialog() != DialogResult.OK) return;
-            int n = _randomDialog.MatrixRank;
-            int p = _randomDialog.Probability;
+            if (RandomDialog.ShowDialog() != DialogResult.OK) return;
+            int n = RandomDialog.MatrixRank;
+            int p = RandomDialog.Probability;
             var matrix = new string[n, n];
             var intermedian = new string[n, n];
             for (int i = 0; i < n; i++)
@@ -148,10 +160,10 @@ namespace TravellingSalesman
         private async void runFloydToolStripMenuItem_Click(object sender, EventArgs e)
         {
             IFloydAlgorithm floyd;
-            if (_settings.IsCudaEngine)
-                floyd = new CudaFloydAlgorithm(_settings.GridSize, _settings.BlockSize);
-            else if (_settings.IsMpiEngine)
-                floyd = new MpiFloydAlgorithm(_settings.NumberOfProcess);
+            if (Settings.IsCudaEngine)
+                floyd = new CudaFloydAlgorithm(Settings.GridSize, Settings.BlockSize);
+            else if (Settings.IsMpiEngine)
+                floyd = new MpiFloydAlgorithm(Settings.NumberOfProcess);
             else
                 throw new NotImplementedException();
             int n = 0;
@@ -207,18 +219,18 @@ namespace TravellingSalesman
         {
             IFloydAlgorithm floyd;
             ILittleAlgorithm little;
-            if (_settings.IsCudaEngine)
+            if (Settings.IsCudaEngine)
             {
-                floyd = new CudaFloydAlgorithm(_settings.GridSize, _settings.BlockSize);
-                little = new CudaLittleAlgorithm(_settings.GridSize, _settings.BlockSize)
+                floyd = new CudaFloydAlgorithm(Settings.GridSize, Settings.BlockSize);
+                little = new CudaLittleAlgorithm(Settings.GridSize, Settings.BlockSize)
                 {
                     InputFileName = floyd.OutputFileName
                 };
             }
-            else if (_settings.IsMpiEngine)
+            else if (Settings.IsMpiEngine)
             {
-                floyd = new MpiFloydAlgorithm(_settings.NumberOfProcess);
-                little = new MpiLittleAlgorithm(_settings.NumberOfProcess)
+                floyd = new MpiFloydAlgorithm(Settings.NumberOfProcess);
+                little = new MpiLittleAlgorithm(Settings.NumberOfProcess)
                 {
                     InputFileName = floyd.OutputFileName
                 };
@@ -296,8 +308,8 @@ namespace TravellingSalesman
 
         private void sameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (_sameDialog.ShowDialog() != DialogResult.OK) return;
-            int n = _sameDialog.MatrixRank;
+            if (SameDialog.ShowDialog() != DialogResult.OK) return;
+            int n = SameDialog.MatrixRank;
             var matrix = new string[n, n];
             var intermedian = new string[n, n];
             for (int i = 0; i < n; i++)

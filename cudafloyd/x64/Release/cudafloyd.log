@@ -1,7 +1,7 @@
-﻿Сборка начата 02.06.2014 20:37:36.
+﻿Сборка начата 10.06.2014 0:59:43.
      1>Проект "D:\Projects\TravellingSalesman\cudafloyd\cudafloyd.vcxproj" в узле 2 (целевые объекты Rebuild).
      1>CudaClean:
-         cmd.exe /C "X:\Temp\tmp60c3b11ebb054faaacb8a680bd4ba955.cmd"
+         cmd.exe /C "X:\Temp\tmpadd49f035f2346b5a0414e7314a180f1.cmd"
          "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile      -DWIN32 -DNDEBUG -D_CONSOLE -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\floyd.cu.obj "D:\Projects\TravellingSalesman\cudafloyd\floyd.cu" -clean
          
          D:\Projects\TravellingSalesman\cudafloyd>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile      -DWIN32 -DNDEBUG -D_CONSOLE -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\floyd.cu.obj "D:\Projects\TravellingSalesman\cudafloyd\floyd.cu" -clean 
@@ -9,7 +9,7 @@
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\cl.exe /E /nologo /showIncludes /TP /D__CUDACC__ /DWIN32 /DNDEBUG /D_CONSOLE /D_UNICODE /DUNICODE /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin" /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" /I. /FIcuda_runtime.h /c D:\Projects\TravellingSalesman\cudafloyd\floyd.cu 
        CudaBuild:
          Compiling CUDA source file floyd.cu...
-         cmd.exe /C "X:\Temp\tmp846ad24aa5754d33ae9a6be5010718f1.cmd"
+         cmd.exe /C "X:\Temp\tmp467ec9200ce14d2685fbc961bd7eb3fe.cmd"
          "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -gencode=arch=compute_10,code=\"sm_10,compute_10\" --use-local-env --cl-version 2012 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DNDEBUG -D_CONSOLE -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\floyd.cu.obj "D:\Projects\TravellingSalesman\cudafloyd\floyd.cu"
          
          D:\Projects\TravellingSalesman\cudafloyd>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -gencode=arch=compute_10,code=\"sm_10,compute_10\" --use-local-env --cl-version 2012 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DNDEBUG -D_CONSOLE -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\floyd.cu.obj "D:\Projects\TravellingSalesman\cudafloyd\floyd.cu" 
@@ -21,4 +21,4 @@
 
 Построение успешно завершено.
 
-Затраченное время: 00:00:09.14
+Затраченное время: 00:00:08.03

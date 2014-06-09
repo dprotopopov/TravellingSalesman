@@ -54,8 +54,8 @@ namespace TravellingSalesman
             if (CudaBuildChooseDialog.ShowDialog() != DialogResult.OK) return;
             MyLibrary.Collections.Properties values = CudaBuildChooseDialog.Values;
             if (values == null) return;
-            GridSize = 1;
-            BlockSize = Convert.ToInt32(values["N"]);
+            GridSize = Convert.ToInt32(values["GridSize"]);
+            BlockSize = Convert.ToInt32(values["BlockSize"]);
         }
 
         private void button3_Click(object sender, EventArgs e)

@@ -1,4 +1,4 @@
-﻿Сборка начата 02.06.2014 20:37:44.
+﻿Сборка начата 10.06.2014 0:59:49.
      1>Проект "D:\Projects\TravellingSalesman\mpifloyd\mpifloyd.vcxproj" в узле 3 (целевые объекты Rebuild).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /Od /Oi /Oy- /GL /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt floyd.cpp
@@ -12,4 +12,4 @@
 
 Построение успешно завершено.
 
-Затраченное время: 00:00:00.71
+Затраченное время: 00:00:00.57

@@ -18,7 +18,7 @@ namespace TravellingSalesman
         private static readonly Random Rnd = new Random();
 
         private static readonly BuildChooseDialog CudaBuildChooseDialog =
-            new BuildChooseDialog(typeof (MyCudaFormula));
+            new BuildChooseDialog(typeof (MyCudaNvidiaFormula));
 
         private static readonly BuildChooseDialog MpiBuildChooseDialog =
             new BuildChooseDialog(typeof (MyMpiFormula));
@@ -81,9 +81,15 @@ namespace TravellingSalesman
         {
             ILittleAlgorithm little;
             if (Settings.IsCudaEngine)
+            {
                 little = new CudaLittleAlgorithm(Settings.GridSize, Settings.BlockSize);
+                textBox1.Text = Settings.CudaBuildChooseDialog.ToString();
+            }
             else if (Settings.IsMpiEngine)
+            {
                 little = new MpiLittleAlgorithm(Settings.NumberOfProcess);
+                textBox1.Text = Settings.MpiBuildChooseDialog.ToString();
+            }
             else
                 throw new NotImplementedException();
 
@@ -137,7 +143,7 @@ namespace TravellingSalesman
                 textBox2.Text = string.Join(Environment.NewLine,
                     pairs.Select(p => string.Format("({0},{1})", p[0], p[1])));
             }
-            textBox1.Text = little.Log;
+            textBox1.AppendText(little.Log);
             var timeSpan = new TimeSpan(end.Ticks - start.Ticks);
             MessageBox.Show(timeSpan.ToString());
         }
@@ -161,9 +167,15 @@ namespace TravellingSalesman
         {
             IFloydAlgorithm floyd;
             if (Settings.IsCudaEngine)
+            {
                 floyd = new CudaFloydAlgorithm(Settings.GridSize, Settings.BlockSize);
+                textBox1.Text = Settings.CudaBuildChooseDialog.ToString();
+            }
             else if (Settings.IsMpiEngine)
+            {
                 floyd = new MpiFloydAlgorithm(Settings.NumberOfProcess);
+                textBox1.Text = Settings.MpiBuildChooseDialog.ToString();
+            }
             else
                 throw new NotImplementedException();
             int n = 0;
@@ -210,7 +222,7 @@ namespace TravellingSalesman
                 _dataGridViewMatrix.TheData = floyd.Matrix;
                 _dataGridViewIntermedian.TheData = floyd.Intermedian;
             }
-            textBox1.Text = floyd.Log;
+            textBox1.AppendText(floyd.Log);
             var timeSpan = new TimeSpan(end.Ticks - start.Ticks);
             MessageBox.Show(timeSpan.ToString());
         }
@@ -226,6 +238,7 @@ namespace TravellingSalesman
                 {
                     InputFileName = floyd.OutputFileName
                 };
+                textBox1.Text = Settings.CudaBuildChooseDialog.ToString();
             }
             else if (Settings.IsMpiEngine)
             {
@@ -234,6 +247,7 @@ namespace TravellingSalesman
                 {
                     InputFileName = floyd.OutputFileName
                 };
+                textBox1.Text = Settings.MpiBuildChooseDialog.ToString();
             }
             else
                 throw new NotImplementedException();
@@ -301,7 +315,8 @@ namespace TravellingSalesman
                 textBox2.Text = string.Join(Environment.NewLine,
                     pairs.Select(p => string.Format("({0},{1})", p[0], p[1])));
             }
-            textBox1.Text = floyd.Log + little.Log;
+            textBox1.AppendText(floyd.Log);
+            textBox1.AppendText(little.Log);
             var timeSpan = new TimeSpan(end.Ticks - start.Ticks);
             MessageBox.Show(timeSpan.ToString());
         }

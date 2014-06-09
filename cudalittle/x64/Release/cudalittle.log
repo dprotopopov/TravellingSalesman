@@ -1,7 +1,7 @@
-﻿Сборка начата 02.06.2014 20:37:33.
+﻿Сборка начата 10.06.2014 0:59:40.
      1>Проект "D:\Projects\TravellingSalesman\cudalittle\cudalittle.vcxproj" в узле 3 (целевые объекты Rebuild).
      1>CudaClean:
-         cmd.exe /C "X:\Temp\tmp9fdf0e10c1d64cf7b4840bd622aa2ba6.cmd"
+         cmd.exe /C "X:\Temp\tmpe0d7cfe4081f4464bc0e01f32c86da82.cmd"
          "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile      -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\little.cu.obj "D:\Projects\TravellingSalesman\cudalittle\little.cu" -clean
          
          D:\Projects\TravellingSalesman\cudalittle>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile      -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\little.cu.obj "D:\Projects\TravellingSalesman\cudalittle\little.cu" -clean 
@@ -9,7 +9,7 @@
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\cl.exe /E /nologo /showIncludes /TP /D__CUDACC__ /D_UNICODE /DUNICODE /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin" /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" /I. /FIcuda_runtime.h /c D:\Projects\TravellingSalesman\cudalittle\little.cu 
        CudaBuild:
          Compiling CUDA source file little.cu...
-         cmd.exe /C "X:\Temp\tmpf80da707dbff4a5780eb4e5d0b241c7b.cmd"
+         cmd.exe /C "X:\Temp\tmp166eb2b70fb446568ce64e46df9eba4e.cmd"
          "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -gencode=arch=compute_10,code=\"sm_10,compute_10\" --use-local-env --cl-version 2012 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\little.cu.obj "D:\Projects\TravellingSalesman\cudalittle\little.cu"
          
          D:\Projects\TravellingSalesman\cudalittle>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -gencode=arch=compute_10,code=\"sm_10,compute_10\" --use-local-env --cl-version 2012 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\little.cu.obj "D:\Projects\TravellingSalesman\cudalittle\little.cu" 
@@ -21,4 +21,4 @@
 
 Построение успешно завершено.
 
-Затраченное время: 00:00:10.23
+Затраченное время: 00:00:09.16

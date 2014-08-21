@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
+  <Identity Name="64189RBADESIGNLLC.FloydsAlgorithm" Version="1.0.0.2" Publisher="CN=AF4638CB-3520-4C8D-AF2C-2103D90E5744" />
+  <Properties>
+    <DisplayName>Floyd’s Algorithm</DisplayName>
+    <PublisherDisplayName>RBA DESIGN LLC</PublisherDisplayName>
+    <Logo>images\StoreLogo.png</Logo>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.2.1</OSMinVersion>
+    <OSMaxVersionTested>6.2.1</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="floyd.Win8" StartPage="index.html">
+      <VisualElements DisplayName="Floyd’s Algorithm" Logo="images\Square150x150Logo.png" SmallLogo="images\Square30x30Logo.png" Description="Shortest distance from point A to point B" ForegroundText="light" BackgroundColor="#464646">
+        <DefaultTile ShowName="logoOnly" WideLogo="images\Wide310x150Logo.png" />
+        <SplashScreen Image="images\SplashScreen.png" />
+        <InitialRotationPreference>
+          <Rotation Preference="portrait" />
+          <Rotation Preference="landscape" />
+          <Rotation Preference="portraitFlipped" />
+          <Rotation Preference="landscapeFlipped" />
+        </InitialRotationPreference>
+      </VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClient" />
+    <Capability Name="removableStorage" />
+  </Capabilities>
+</Package>

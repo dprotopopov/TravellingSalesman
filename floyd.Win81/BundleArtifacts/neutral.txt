@@ -1,0 +1,3 @@
+MainPackage=D:\Projects\TravellingSalesman\floyd.Win81\bin\Release\floyd.Win81_1.1.0.0_Bundle\floyd.Win81_1.1.0.0_AnyCPU.appx
+ResourcePack=D:\Projects\TravellingSalesman\floyd.Win81\bin\Release\floyd.Win81_1.1.0.0_Bundle\floyd.Win81_1.1.0.0_scale-140.appx
+ResourcePack=D:\Projects\TravellingSalesman\floyd.Win81\bin\Release\floyd.Win81_1.1.0.0_Bundle\floyd.Win81_1.1.0.0_scale-180.appx

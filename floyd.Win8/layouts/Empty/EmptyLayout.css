@@ -1,0 +1,22 @@
+﻿.empty-layout {
+    height: 100%;
+    position: relative;
+    width: 100%;
+}
+
+.dx-theme-ios7 .empty-layout .layout-content { background-color: #EFEFF4; }
+
+/* Prevent margin collapse */
+
+.empty-layout::before {
+    content: "\00a0";
+    display: block;
+    height: 0;
+    overflow: hidden;
+}
+
+.empty-layout > div.content,
+.empty-layout > div.content > div {
+    height: 100%;
+    width: 100%;
+}

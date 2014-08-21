@@ -1,0 +1,15 @@
+# Built application files
+*.xap
+*.apk
+*.ap_
+*.appxupload
+
+# Generated files
+Backup/
+bin/
+mobile/
+story_content/
+icons/
+Win8Phone.icons/
+packages/
+bower_components/

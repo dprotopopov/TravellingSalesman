@@ -1,0 +1,37 @@
+﻿<div data-options="dxView : { name: 'View1', title: 'Floyd' } ">
+    <div data-options="dxContent : { targetPlaceholder: 'content' } ">
+        <div id="toolbar" data-bind="dxToolbar:{dataSource: toolbarItems}"></div>
+        <!--<div id="slideOut" data-bind="dxSlideOut: { dataSource: slideoutItems }">
+            <div data-options="dxTemplate : { name: 'menuItem' } ">
+                <div data-bind="dxButton: { text: 'Floyd', icon: 'runner', clickAction: '#View1'}"></div>
+                <div data-bind="dxButton: { text: 'About', icon: 'runner', clickAction: '#About'}"></div>
+                <div data-bind="dxButton: { text: 'Clear', clickAction: '#View1/clear'}"></div>
+                <div data-bind="dxButton: { text: 'Exit'}"></div>
+            </div>
+        </div>-->
+        <div id="wrapper">
+            <div data-bind="dxPivot: { dataSource: pivotItems, itemSelectAction: pivotItemSelectAction }">
+                <div data-options="dxTemplate : { name: 'items' } ">
+                    <div id="dataGridItems" data-bind="dxDataGrid: { columns: columns, dataSource: dataSource, editing: editing, scrolling: scrolling }"></div>
+                </div>
+                <div data-options="dxTemplate : { name: 'prices' } ">
+                    <div id="dataGridPrices" data-bind="dxDataGrid: { columns: columns, dataSource: dataSource, editing: editing, scrolling: scrolling }"></div>
+                </div>
+                <div data-options="dxTemplate : { name: 'minimum' } ">
+                    <div id="dataGridMinimum" data-bind="dxDataGrid: { columns: columns, dataSource: dataSource, editing: editing, scrolling: scrolling, cellClick:cellClick }"></div>
+                </div>
+            </div>
+        </div>
+        <div id="overlayContainer" data-bind="dxOverlay: { visible: overlayVisible }">
+            <div class="overlayContents">
+                <div id="dataGridPath" data-bind="dxDataGrid: { columns: columns, dataSource: dataSource, editing: editing, scrolling: scrolling }"></div>
+                <div class="dx-field">
+                    <div class="dx-field-label">Price Summary</div>
+                    <div class="dx-field-value" data-bind="dxTextBox: {  value: priceSummary }"></div>
+                </div>
+                <div class="button" data-bind="dxButton: { text: 'Hide', clickAction: hideOverlay }"></div>
+            </div>
+        </div>
+        <div id="toastContainer" data-bind="dxToast:{ message: message, type:'info', displayTime: 3000 }"></div>
+    </div>
+</div>

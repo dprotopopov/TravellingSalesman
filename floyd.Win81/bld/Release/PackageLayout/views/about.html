@@ -1,0 +1,48 @@
+﻿<div data-options="dxView : { name: 'About', title: 'About Floyd’s Algorithm', pane: 'master' } ">
+    <div data-options="dxContent : { targetPlaceholder: 'content' } ">
+        <div data-bind="dxToolbar:{items:[ { location: 'before', widget: 'button', options: {type: 'back', text: 'Back', clickAction: '#View1' }}]}"></div>
+        <div data-bind="dxScrollView: {}">
+            <h1 id="firstHeading" class="firstHeading" lang="en"><span dir="auto">Floyd–Warshall algorithm</span></h1>
+            <p>In <a href="/wiki/Computer_science" title="Computer science">computer science</a>, the <b>Floyd–Warshall algorithm</b> (also known as <b>Floyd's algorithm</b>, <b>Roy–Warshall algorithm</b>, <b>Roy–Floyd algorithm</b>, or the <b>WFI algorithm</b>) is a <a href="/wiki/Graph_(mathematics)" title="Graph (mathematics)">graph</a> analysis <a href="/wiki/Algorithm" title="Algorithm">algorithm</a> for finding <a href="/wiki/Shortest_path_problem" title="Shortest path problem">shortest paths</a> in a <a href="/wiki/Weighted_graph" title="Weighted graph" class="mw-redirect">weighted graph</a> with positive or negative edge weights (but with no negative cycles, see below) and also for finding <a href="/wiki/Transitive_closure" title="Transitive closure">transitive closure</a> of a relation <img class="mwe-math-fallback-png-inline tex" alt="R" src="//upload.wikimedia.org/math/e/1/e/e1e1d3d40573127e9ee0480caf1283d6.png">. A single execution of the algorithm will find the lengths (summed weights) of the shortest paths between <i>all</i> pairs of vertices, though it does not return details of the paths themselves.</p>
+            <p>The Floyd–Warshall algorithm was published in its currently recognized form by <a href="/wiki/Robert_Floyd" title="Robert Floyd" class="mw-redirect">Robert Floyd</a> in 1962. However, it is essentially the same as algorithms previously published by <a href="/wiki/Bernard_Roy" title="Bernard Roy">Bernard Roy</a> in 1959 and also by <a href="/wiki/Stephen_Warshall" title="Stephen Warshall">Stephen Warshall</a> in 1962 for finding the transitive closure of a graph.<sup id="cite_ref-1" class="reference"><a href="#cite_note-1"><span>[</span>1<span>]</span></a></sup> The modern formulation of Warshall's algorithm as three nested for-loops was first described by Peter Ingerman, also in 1962.</p>
+            <h2><span class="mw-headline" id="Algorithm">Algorithm</span></h2>
+            <p>The Floyd–Warshall algorithm compares all possible paths through the graph between each pair of vertices. It is able to do this with Θ(|<i>V</i>|<sup>3</sup>) comparisons in a graph. This is remarkable considering that there may be up to Ω(|<i>V</i>|<sup>2</sup>) edges in the graph, and every combination of edges is tested. It does so by incrementally improving an estimate on the shortest path between two vertices, until the estimate is optimal.</p>
+            <p>Consider a graph <i>G</i> with vertices <i>V</i> numbered 1 through&nbsp;<i>N</i>. Further consider a function shortestPath(<i>i</i>,&nbsp;<i>j</i>,&nbsp;<i>k</i>) that returns the shortest possible path from <i>i</i> to <i>j</i> using vertices only from the set {1,2,...,<i>k</i>} as intermediate points along the way. Now, given this function, our goal is to find the shortest path from each <i>i</i> to each <i>j</i> using only vertices 1 to&nbsp;<i>k</i>&nbsp;+&nbsp;1.</p>
+            <p>For each of these pairs of vertices, the true shortest path could be either (1) a path that only uses vertices in the set {1,&nbsp;...,&nbsp;<i>k</i>} or (2) a path that goes from <i>i</i> to <i>k</i>&nbsp;+&nbsp;1 and then from <i>k</i>&nbsp;+&nbsp;1 to <i>j</i>. We know that the best path from <i>i</i> to <i>j</i> that only uses vertices 1 through <i>k</i> is defined by shortestPath(<i>i</i>,&nbsp;<i>j</i>,&nbsp;<i>k</i>), and it is clear that if there were a better path from <i>i</i> to <i>k</i>&nbsp;+&nbsp;1 to <i>j</i>, then the length of this path would be the concatenation of the shortest path from <i>i</i> to <i>k</i>&nbsp;+&nbsp;1 (using vertices in {1,&nbsp;...,&nbsp;<i>k</i>}) and the shortest path from <i>k</i>&nbsp;+&nbsp;1 to <i>j</i> (also using vertices in&nbsp;{1,&nbsp;...,&nbsp;<i>k</i>}).</p>
+            <p>If <img class="mwe-math-fallback-png-inline tex" alt="w(i, j)" src="//upload.wikimedia.org/math/2/c/6/2c60f20b3e6bd71a556b478712321fa1.png"> is the weight of the edge between vertices <i>i</i> and <i>j</i>, we can define shortestPath(<i>i</i>,&nbsp;<i>j</i>,&nbsp;<i>k</i> + 1) in terms of the following <a href="/wiki/Recursion" title="Recursion">recursive</a> formula: the base case is</p>
+            <dl>
+                <dd><img class="mwe-math-fallback-png-inline tex" alt="\textrm{shortestPath}(i, j, 0) = w(i, j)" src="6d90d64e88ff91afce2ad4688c9c64f4.png"></dd>
+            </dl>
+            <p>and the recursive case is</p>
+            <dl>
+                <dd><img class="mwe-math-fallback-png-inline tex" alt="\textrm{shortestPath}(i,j,k+1) = \min(\textrm{shortestPath}(i,j,k),\,\textrm{shortestPath}(i,k+1,k) + \textrm{shortestPath}(k+1,j,k))" src="2928b6ef864866b2243a6323dc780cc9.png"></dd>
+            </dl>
+            <p>This formula is the heart of the Floyd–Warshall algorithm. The algorithm works by first computing shortestPath(<i>i</i>,&nbsp;<i>j</i>,&nbsp;<i>k</i>) for all (<i>i</i>,&nbsp;<i>j</i>) pairs for <i>k</i>&nbsp;=&nbsp;1, then <i>k</i>&nbsp;=&nbsp;2, etc. This process continues until <i>k</i>&nbsp;=&nbsp;<i>n</i>, and we have found the shortest path for all (<i>i</i>,&nbsp;<i>j</i>) pairs using any intermediate vertices. Pseudocode for this basic version follows:</p>
+            <pre>1 <b>let</b> dist be a |V| × |V| array of minimum distances initialized to ∞ (infinity)
+2 <b>for each</b> vertex <i>v</i>
+3    dist[<i>v</i>][<i>v</i>] ← 0
+4 <b>for each</b> edge (<i>u</i>,<i>v</i>)
+5    dist[<i>u</i>][<i>v</i>] ← w(<i>u</i>,<i>v</i>)  <i>// the weight of the edge (</i>u<i>,</i>v<i>)</i>
+6 <b>for</b> <i>k</i> <b>from</b> 1 <b>to</b> |V|
+7    <b>for</b> <i>i</i> <b>from</b> 1 <b>to</b> |V|
+8       <b>for</b> <i>j</i> <b>from</b> 1 <b>to</b> |V|
+9          <b>if</b> dist[<i>i</i>][<i>j</i>] &gt; dist[<i>i</i>][<i>k</i>] + dist[<i>k</i>][<i>j</i>] 
+10             dist[<i>i</i>][<i>j</i>] ← dist[<i>i</i>][<i>k</i>] + dist[<i>k</i>][<i>j</i>]
+11         <b>end if</b>
+</pre>
+             <p>
+                Used to find shortest paths in a weighted graph
+            </p><p>
+                 Travel maps containing driving distance from one point to another
+            </p><p>
+                – Represented by tables
+            </p><p>
+                – Shortest distance from point A to point B given by intersection of row and column
+            </p><p>
+                – Route may pass through other cities represented in the table
+            </p><p>
+                 Navigation systems
+            </p>
+        </div>
+    </div>
+</div>

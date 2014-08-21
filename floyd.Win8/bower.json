@@ -1,0 +1,21 @@
+{
+  "name": "floyd.Win8",
+  "main": "index.html",
+  "version": "0.0.0",
+  "homepage": "https://github.com/dprotopopov/TravellingSalesman",
+  "authors": [
+    "dprotopopov <protopopov@narod.ru>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "2005844": "https://gist.github.com/2005844.git"
+  }
+}

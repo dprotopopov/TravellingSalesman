@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PriInfo>
+	<ResourceMap name="64189RBADESIGNLLC.FloydsAlgorithm" version="1.0" primary="true">
+		<Qualifiers>
+			<Scale>80, 100</Scale>
+			<TargetSize>48, 32, 256, 16</TargetSize>
+		</Qualifiers>
+		<ResourceMapSubtree name="Files">
+			<NamedResource name="2928b6ef864866b2243a6323dc780cc9.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/2928b6ef864866b2243a6323dc780cc9.png">
+				<Candidate type="Path">
+					<Value>2928b6ef864866b2243a6323dc780cc9.png</Value>
+				</Candidate>
+			</NamedResource>
+			<NamedResource name="6d90d64e88ff91afce2ad4688c9c64f4.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/6d90d64e88ff91afce2ad4688c9c64f4.png">
+				<Candidate type="Path">
+					<Value>6d90d64e88ff91afce2ad4688c9c64f4.png</Value>
+				</Candidate>
+			</NamedResource>
+			<NamedResource name="floyd.config.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/floyd.config.js">
+				<Candidate type="Path">
+					<Value>floyd.config.js</Value>
+				</Candidate>
+			</NamedResource>
+			<NamedResource name="floyd.shared.config.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/floyd.shared.config.js">
+				<Candidate type="Path">
+					<Value>floyd.shared.config.js</Value>
+				</Candidate>
+			</NamedResource>
+			<NamedResource name="index.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/index.css">
+				<Candidate type="Path">
+					<Value>index.css</Value>
+				</Candidate>
+			</NamedResource>
+			<NamedResource name="index.html" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/index.html">
+				<Candidate type="Path">
+					<Value>index.html</Value>
+				</Candidate>
+			</NamedResource>
+			<NamedResource name="index.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/index.js">
+				<Candidate type="Path">
+					<Value>index.js</Value>
+				</Candidate>
+			</NamedResource>
+			<NamedResource name="StyleSheet1.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/StyleSheet1.css">
+				<Candidate type="Path">
+					<Value>StyleSheet1.css</Value>
+				</Candidate>
+			</NamedResource>
+			<ResourceMapSubtree name="bower_components">
+				<ResourceMapSubtree name="2005844">
+					<NamedResource name="workaround.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/bower_components/2005844/workaround.js">
+						<Candidate type="Path">
+							<Value>bower_components\2005844\workaround.js</Value>
+						</Candidate>
+					</NamedResource>
+				</ResourceMapSubtree>
+				<ResourceMapSubtree name="html5shiv">
+					<ResourceMapSubtree name="dist">
+						<NamedResource name="html5shiv.min.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/bower_components/html5shiv/dist/html5shiv.min.js">
+							<Candidate type="Path">
+								<Value>bower_components\html5shiv\dist\html5shiv.min.js</Value>
+							</Candidate>
+						</NamedResource>
+					</ResourceMapSubtree>
+				</ResourceMapSubtree>
+				<ResourceMapSubtree name="mathjs">
+					<ResourceMapSubtree name="dist">
+						<NamedResource name="math.map" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/bower_components/mathjs/dist/math.map">
+							<Candidate type="Path">
+								<Value>bower_components\mathjs\dist\math.map</Value>
+							</Candidate>
+						</NamedResource>
+						<NamedResource name="math.min.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/bower_components/mathjs/dist/math.min.js">
+							<Candidate type="Path">
+								<Value>bower_components\mathjs\dist\math.min.js</Value>
+							</Candidate>
+						</NamedResource>
+					</ResourceMapSubtree>
+				</ResourceMapSubtree>
+			</ResourceMapSubtree>
+			<ResourceMapSubtree name="css">
+				<NamedResource name="dx.android.holo-dark.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.android.holo-dark.css">
+					<Candidate type="Path">
+						<Value>css\dx.android.holo-dark.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.android.holo-light.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.android.holo-light.css">
+					<Candidate type="Path">
+						<Value>css\dx.android.holo-light.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.common.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.common.css">
+					<Candidate type="Path">
+						<Value>css\dx.common.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.dark.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.dark.css">
+					<Candidate type="Path">
+						<Value>css\dx.dark.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.ios.default.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.ios.default.css">
+					<Candidate type="Path">
+						<Value>css\dx.ios.default.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.ios7.default.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.ios7.default.css">
+					<Candidate type="Path">
+						<Value>css\dx.ios7.default.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.light.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.light.css">
+					<Candidate type="Path">
+						<Value>css\dx.light.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.spa.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.spa.css">
+					<Candidate type="Path">
+						<Value>css\dx.spa.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.tizen.black.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.tizen.black.css">
+					<Candidate type="Path">
+						<Value>css\dx.tizen.black.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.tizen.white.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.tizen.white.css">
+					<Candidate type="Path">
+						<Value>css\dx.tizen.white.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.win8.black.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.win8.black.css">
+					<Candidate type="Path">
+						<Value>css\dx.win8.black.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.win8.white.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/css/dx.win8.white.css">
+					<Candidate type="Path">
+						<Value>css\dx.win8.white.css</Value>
+					</Candidate>
+				</NamedResource>
+			</ResourceMapSubtree>
+			<ResourceMapSubtree name="data">
+				<NamedResource name="db.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/data/db.js">
+					<Candidate type="Path">
+						<Value>data\db.js</Value>
+					</Candidate>
+				</NamedResource>
+			</ResourceMapSubtree>
+			<ResourceMapSubtree name="images">
+				<NamedResource name="logo.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/images/logo.png">
+					<Candidate type="Path">
+						<Value>images\logo.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="smalllogo.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/images/smalllogo.png">
+					<Candidate type="Path">
+						<Value>images\smalllogo.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="SplashScreen.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/images/SplashScreen.png">
+					<Candidate qualifiers="Scale-100" isDefault="true" type="Path">
+						<Value>images\SplashScreen.scale-100.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="Square150x150Logo.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/images/Square150x150Logo.png">
+					<Candidate qualifiers="Scale-80" isDefault="true" type="Path">
+						<Value>images\Square150x150Logo.scale-80.png</Value>
+					</Candidate>
+					<Candidate qualifiers="Scale-100" isDefault="true" type="Path">
+						<Value>images\Square150x150Logo.scale-100.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="Square30x30Logo.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/images/Square30x30Logo.png">
+					<Candidate qualifiers="TargetSize-48" isDefault="true" type="Path">
+						<Value>images\Square30x30Logo.targetsize-48.png</Value>
+					</Candidate>
+					<Candidate qualifiers="TargetSize-32" isDefault="true" type="Path">
+						<Value>images\Square30x30Logo.targetsize-32.png</Value>
+					</Candidate>
+					<Candidate qualifiers="TargetSize-256" isDefault="true" type="Path">
+						<Value>images\Square30x30Logo.targetsize-256.png</Value>
+					</Candidate>
+					<Candidate qualifiers="TargetSize-16" isDefault="true" type="Path">
+						<Value>images\Square30x30Logo.targetsize-16.png</Value>
+					</Candidate>
+					<Candidate qualifiers="Scale-80" isDefault="true" type="Path">
+						<Value>images\Square30x30Logo.scale-80.png</Value>
+					</Candidate>
+					<Candidate qualifiers="Scale-100" isDefault="true" type="Path">
+						<Value>images\Square30x30Logo.scale-100.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="Square310x310Logo.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/images/Square310x310Logo.png">
+					<Candidate qualifiers="Scale-80" isDefault="true" type="Path">
+						<Value>images\Square310x310Logo.scale-80.png</Value>
+					</Candidate>
+					<Candidate qualifiers="Scale-100" isDefault="true" type="Path">
+						<Value>images\Square310x310Logo.scale-100.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="Square70x70Logo.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/images/Square70x70Logo.png">
+					<Candidate qualifiers="Scale-80" isDefault="true" type="Path">
+						<Value>images\Square70x70Logo.scale-80.png</Value>
+					</Candidate>
+					<Candidate qualifiers="Scale-100" isDefault="true" type="Path">
+						<Value>images\Square70x70Logo.scale-100.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="StoreLogo.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/images/StoreLogo.png">
+					<Candidate qualifiers="Scale-100" isDefault="true" type="Path">
+						<Value>images\StoreLogo.scale-100.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="Wide310x150Logo.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/images/Wide310x150Logo.png">
+					<Candidate qualifiers="Scale-80" isDefault="true" type="Path">
+						<Value>images\Wide310x150Logo.scale-80.png</Value>
+					</Candidate>
+					<Candidate qualifiers="Scale-100" isDefault="true" type="Path">
+						<Value>images\Wide310x150Logo.scale-100.png</Value>
+					</Candidate>
+				</NamedResource>
+			</ResourceMapSubtree>
+			<ResourceMapSubtree name="js">
+				<NamedResource name="dx.all.debug.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/js/dx.all.debug.js">
+					<Candidate type="Path">
+						<Value>js\dx.all.debug.js</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="dx.all.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/js/dx.all.js">
+					<Candidate type="Path">
+						<Value>js\dx.all.js</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="globalize.min.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/js/globalize.min.js">
+					<Candidate type="Path">
+						<Value>js\globalize.min.js</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="jquery-1.11.1.min.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/js/jquery-1.11.1.min.js">
+					<Candidate type="Path">
+						<Value>js\jquery-1.11.1.min.js</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="jquery-2.1.1.min.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/js/jquery-2.1.1.min.js">
+					<Candidate type="Path">
+						<Value>js\jquery-2.1.1.min.js</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="knockout-3.1.0.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/js/knockout-3.1.0.js">
+					<Candidate type="Path">
+						<Value>js\knockout-3.1.0.js</Value>
+					</Candidate>
+				</NamedResource>
+				<ResourceMapSubtree name="localization">
+					<NamedResource name="dx.all.de.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/js/localization/dx.all.de.js">
+						<Candidate type="Path">
+							<Value>js\localization\dx.all.de.js</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="dx.all.ja.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/js/localization/dx.all.ja.js">
+						<Candidate type="Path">
+							<Value>js\localization\dx.all.ja.js</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="dx.all.ru.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/js/localization/dx.all.ru.js">
+						<Candidate type="Path">
+							<Value>js\localization\dx.all.ru.js</Value>
+						</Candidate>
+					</NamedResource>
+				</ResourceMapSubtree>
+			</ResourceMapSubtree>
+			<ResourceMapSubtree name="layouts">
+				<ResourceMapSubtree name="Empty">
+					<NamedResource name="EmptyLayout.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Empty/EmptyLayout.css">
+						<Candidate type="Path">
+							<Value>layouts\Empty\EmptyLayout.css</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="EmptyLayout.html" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Empty/EmptyLayout.html">
+						<Candidate type="Path">
+							<Value>layouts\Empty\EmptyLayout.html</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="EmptyLayout.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Empty/EmptyLayout.js">
+						<Candidate type="Path">
+							<Value>layouts\Empty\EmptyLayout.js</Value>
+						</Candidate>
+					</NamedResource>
+				</ResourceMapSubtree>
+				<ResourceMapSubtree name="Navbar">
+					<NamedResource name="NavbarLayout.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Navbar/NavbarLayout.css">
+						<Candidate type="Path">
+							<Value>layouts\Navbar\NavbarLayout.css</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="NavbarLayout.html" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Navbar/NavbarLayout.html">
+						<Candidate type="Path">
+							<Value>layouts\Navbar\NavbarLayout.html</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="NavbarLayout.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Navbar/NavbarLayout.js">
+						<Candidate type="Path">
+							<Value>layouts\Navbar\NavbarLayout.js</Value>
+						</Candidate>
+					</NamedResource>
+				</ResourceMapSubtree>
+				<ResourceMapSubtree name="Pivot">
+					<NamedResource name="PivotLayout.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Pivot/PivotLayout.css">
+						<Candidate type="Path">
+							<Value>layouts\Pivot\PivotLayout.css</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="PivotLayout.html" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Pivot/PivotLayout.html">
+						<Candidate type="Path">
+							<Value>layouts\Pivot\PivotLayout.html</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="PivotLayout.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Pivot/PivotLayout.js">
+						<Candidate type="Path">
+							<Value>layouts\Pivot\PivotLayout.js</Value>
+						</Candidate>
+					</NamedResource>
+				</ResourceMapSubtree>
+				<ResourceMapSubtree name="Simple">
+					<NamedResource name="SimpleLayout.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Simple/SimpleLayout.css">
+						<Candidate type="Path">
+							<Value>layouts\Simple\SimpleLayout.css</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="SimpleLayout.html" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Simple/SimpleLayout.html">
+						<Candidate type="Path">
+							<Value>layouts\Simple\SimpleLayout.html</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="SimpleLayout.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Simple/SimpleLayout.js">
+						<Candidate type="Path">
+							<Value>layouts\Simple\SimpleLayout.js</Value>
+						</Candidate>
+					</NamedResource>
+				</ResourceMapSubtree>
+				<ResourceMapSubtree name="SlideOut">
+					<NamedResource name="SlideOutLayout.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/SlideOut/SlideOutLayout.css">
+						<Candidate type="Path">
+							<Value>layouts\SlideOut\SlideOutLayout.css</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="SlideOutLayout.html" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/SlideOut/SlideOutLayout.html">
+						<Candidate type="Path">
+							<Value>layouts\SlideOut\SlideOutLayout.html</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="SlideOutLayout.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/SlideOut/SlideOutLayout.js">
+						<Candidate type="Path">
+							<Value>layouts\SlideOut\SlideOutLayout.js</Value>
+						</Candidate>
+					</NamedResource>
+				</ResourceMapSubtree>
+				<ResourceMapSubtree name="Split">
+					<NamedResource name="SplitLayout.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Split/SplitLayout.css">
+						<Candidate type="Path">
+							<Value>layouts\Split\SplitLayout.css</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="SplitLayout.html" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Split/SplitLayout.html">
+						<Candidate type="Path">
+							<Value>layouts\Split\SplitLayout.html</Value>
+						</Candidate>
+					</NamedResource>
+					<NamedResource name="SplitLayout.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/layouts/Split/SplitLayout.js">
+						<Candidate type="Path">
+							<Value>layouts\Split\SplitLayout.js</Value>
+						</Candidate>
+					</NamedResource>
+				</ResourceMapSubtree>
+			</ResourceMapSubtree>
+			<ResourceMapSubtree name="linq.js_ver2.2.0.2">
+				<NamedResource name="jquery.linq-vsdoc.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/linq.js_ver2.2.0.2/jquery.linq-vsdoc.js">
+					<Candidate type="Path">
+						<Value>linq.js_ver2.2.0.2\jquery.linq-vsdoc.js</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="jquery.linq.min.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/linq.js_ver2.2.0.2/jquery.linq.min.js">
+					<Candidate type="Path">
+						<Value>linq.js_ver2.2.0.2\jquery.linq.min.js</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="linq-vsdoc.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/linq.js_ver2.2.0.2/linq-vsdoc.js">
+					<Candidate type="Path">
+						<Value>linq.js_ver2.2.0.2\linq-vsdoc.js</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="linq.min.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/linq.js_ver2.2.0.2/linq.min.js">
+					<Candidate type="Path">
+						<Value>linq.js_ver2.2.0.2\linq.min.js</Value>
+					</Candidate>
+				</NamedResource>
+			</ResourceMapSubtree>
+			<ResourceMapSubtree name="Resources">
+				<NamedResource name="PackageIcons.Android.ic_launcher_36_36.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.ic_launcher_36_36.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.ic_launcher_36_36.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Android.ic_launcher_48_48.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.ic_launcher_48_48.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.ic_launcher_48_48.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Android.ic_launcher_72_72.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.ic_launcher_72_72.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.ic_launcher_72_72.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Android.ic_launcher_96_96.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.ic_launcher_96_96.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.ic_launcher_96_96.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Android.splash_1280_720.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.splash_1280_720.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.splash_1280_720.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Android.splash_200_320.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.splash_200_320.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.splash_200_320.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Android.splash_320_200.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.splash_320_200.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.splash_320_200.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Android.splash_320_480.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.splash_320_480.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.splash_320_480.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Android.splash_480_320.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.splash_480_320.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.splash_480_320.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Android.splash_480_800.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.splash_480_800.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.splash_480_800.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Android.splash_720_1280.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.splash_720_1280.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.splash_720_1280.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Android.splash_800_480.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Android.splash_800_480.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Android.splash_800_480.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.Default-568h@2x.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.Default-568h%402x.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.Default-568h@2x.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.Default-Landscape@2x~ipad.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.Default-Landscape%402x~ipad.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.Default-Landscape@2x~ipad.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.Default-Landscape~ipad.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.Default-Landscape~ipad.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.Default-Landscape~ipad.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.Default-Portrait@2x~ipad.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.Default-Portrait%402x~ipad.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.Default-Portrait@2x~ipad.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.Default-Portrait~ipad.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.Default-Portrait~ipad.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.Default-Portrait~ipad.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.Default@2x~iphone.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.Default%402x~iphone.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.Default@2x~iphone.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.Default~iphone.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.Default~iphone.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.Default~iphone.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.icon-120.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.icon-120.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.icon-120.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.icon-152.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.icon-152.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.icon-152.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.icon-72.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.icon-72.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.icon-72.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.icon-72@2x.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.icon-72%402x.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.icon-72@2x.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.icon-76.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.icon-76.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.icon-76.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.icon.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.icon.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.icon.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.icon@2x.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.icon%402x.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.icon@2x.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.iOS.iTunesArtwork.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.iOS.iTunesArtwork.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.iOS.iTunesArtwork.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.Tizen.icon_117_117.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.Tizen.icon_117_117.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.Tizen.icon_117_117.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.WP.ApplicationIcon_99_99.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.WP.ApplicationIcon_99_99.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.WP.ApplicationIcon_99_99.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.WP.Background.png_144_144.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.WP.Background.png_144_144.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.WP.Background.png_144_144.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.WP.SplashScreenImage_768_1280.jpg" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.WP.SplashScreenImage_768_1280.jpg">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.WP.SplashScreenImage_768_1280.jpg</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.WP.TileMedium.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.WP.TileMedium.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.WP.TileMedium.png</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="PackageIcons.WP.TileSmall.png" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/Resources/PackageIcons.WP.TileSmall.png">
+					<Candidate type="Path">
+						<Value>Resources\PackageIcons.WP.TileSmall.png</Value>
+					</Candidate>
+				</NamedResource>
+			</ResourceMapSubtree>
+			<ResourceMapSubtree name="views">
+				<NamedResource name="about.html" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/views/about.html">
+					<Candidate type="Path">
+						<Value>views\about.html</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="blank.html" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/views/blank.html">
+					<Candidate type="Path">
+						<Value>views\blank.html</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="home.css" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/views/home.css">
+					<Candidate type="Path">
+						<Value>views\home.css</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="home.dxview" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/views/home.dxview">
+					<Candidate type="Path">
+						<Value>views\home.dxview</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="home.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/views/home.js">
+					<Candidate type="Path">
+						<Value>views\home.js</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="readme.txt" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/views/readme.txt">
+					<Candidate type="Path">
+						<Value>views\readme.txt</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="View1.dxview" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/views/View1.dxview">
+					<Candidate type="Path">
+						<Value>views\View1.dxview</Value>
+					</Candidate>
+				</NamedResource>
+				<NamedResource name="View1.js" uri="ms-resource://64189RBADESIGNLLC.FloydsAlgorithm/Files/views/View1.js">
+					<Candidate type="Path">
+						<Value>views\View1.js</Value>
+					</Candidate>
+				</NamedResource>
+			</ResourceMapSubtree>
+		</ResourceMapSubtree>
+	</ResourceMap>
+</PriInfo>

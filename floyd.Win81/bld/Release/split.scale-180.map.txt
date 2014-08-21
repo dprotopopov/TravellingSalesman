@@ -1,0 +1,13 @@
+﻿[ResourceMetadata]
+"ResourceId"			"split.scale-180"
+"ResourceDimensions"		"scale-180"
+
+[Files]
+"D:\Projects\TravellingSalesman\floyd.Win81\bld\Release\split.scale-180.pri"			"resources.pri"
+"D:\Projects\TravellingSalesman\floyd.Win81\bld\Release\PackageLayout\images\Wide310x150Logo.scale-180.png"			"images\Wide310x150Logo.scale-180.png"
+"D:\Projects\TravellingSalesman\floyd.Win81\bld\Release\PackageLayout\images\StoreLogo.scale-180.png"			"images\StoreLogo.scale-180.png"
+"D:\Projects\TravellingSalesman\floyd.Win81\bld\Release\PackageLayout\images\Square70x70Logo.scale-180.png"			"images\Square70x70Logo.scale-180.png"
+"D:\Projects\TravellingSalesman\floyd.Win81\bld\Release\PackageLayout\images\Square310x310Logo.scale-180.png"			"images\Square310x310Logo.scale-180.png"
+"D:\Projects\TravellingSalesman\floyd.Win81\bld\Release\PackageLayout\images\Square30x30Logo.scale-180.png"			"images\Square30x30Logo.scale-180.png"
+"D:\Projects\TravellingSalesman\floyd.Win81\bld\Release\PackageLayout\images\Square150x150Logo.scale-180.png"			"images\Square150x150Logo.scale-180.png"
+"D:\Projects\TravellingSalesman\floyd.Win81\bld\Release\PackageLayout\images\SplashScreen.scale-180.png"			"images\SplashScreen.scale-180.png"
